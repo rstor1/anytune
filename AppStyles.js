@@ -4,19 +4,19 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   maincontainer: {
     flexDirection: 'column',
-    justifyContent: 'center',
+    //justifyContent: 'flex-start',
     alignItems: 'center',
   },
   topcontainer: {
-    flexDirection: 'row',
+    //flexDirection: 'row',
     width: '100%',
-    height: '50%',
+    height: '40%',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#102027'
   },
   bottomcontainer: {
-    flexDirection: 'row',
+    //flexDirection: 'row',
     width: '100%',
     height: '70%',
     backgroundColor: 'white'//'#000000',
@@ -40,8 +40,6 @@ const styles = StyleSheet.create({
   urlview: {
     position: 'absolute',
     top: '37.5%',
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: 'transparent',  
     alignItems: 'center',
     width: '100%',
@@ -84,13 +82,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   successtext: {
+
+  },
+  successtextview: {
     position: 'absolute',
-    // left: 0,
-    // right: 0,
-    top: 100,
-    // bottom: 0,
+    top: '45%',
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'center'
+    backgroundColor: 'transparent',  
+    width: '100%',
+    height: '5%',
+    zIndex: 1000
   }
   });
 
@@ -103,6 +105,8 @@ const container = StyleSheet.compose(
   styles.urlview,
   styles.midline,
   styles.convertbutton,
-  styles.activitycontainer);
+  styles.activitycontainer,
+  styles.spacer,
+  styles.successtext);
 
 export default styles;

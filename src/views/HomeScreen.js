@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, View, TextInput, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native';
 import styles from '../../AppStyles';
 import { getVideoIdFromUrl } from './../utils/urlUtil';
+import { validateUrl } from './../utils/urlUtil';
 import { getMp3Link }  from './../routes/getMp3';
 import { downloadFile } from './../utils/downloadFile';
 
@@ -9,30 +10,38 @@ import { downloadFile } from './../utils/downloadFile';
 const HomeScreen = () => {
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [wasSuccess, setWasSuccess] = useState(false);
+  const [hasMessage, setHasMessage] = useState(false);
   const [successText, setSuccessText] = useState('');
 
   function onPressConvert() {
-    setIsLoading(true);
-    //send to api using axios in routes (GET) request
-    getMp3Link(text).then((response) => {
-      setText('');
-      if (response != null) {
-        downloadFile(response.data).then((result) => {
-          if (result == 200) {
-            setWasSuccess(true);
-            setSuccessText('Success!');
-          } 
-        }).then(() => {
+    if (text === undefined || text === "" || text === null || !validateUrl(text)) {
+      setHasMessage(true);
+      setSuccessText('Please enter a valid url');
+    } else {
+      setIsLoading(true);
+      //send to api in routes (GET) request
+      getMp3Link(text).then((response) => {
+        setText('');
+        if (response != null || response != undefined) {
+          downloadFile(response.data).then((result) => {
+            if (result == 200) {
+              setHasMessage(true);
+              setSuccessText('Download complete!');
+            } 
+          }).then(() => {
+            setIsLoading(false);
+          });
+        } else {
           setIsLoading(false);
-        });
-      } else {
-        setIsLoading(false);
-      }
-    }).catch((error) => {
-      console.log('error: ', error);
-    })
+          setHasMessage(false);
+          setSuccessText('Download failed. Please try again.');
+        }
+      }).catch((error) => {
+        console.log('error: ', error);
+      })
+    }
   };
+
 let activityIndicator =  <View style={[styles.activitycontainer]}>
                           <ActivityIndicator size="large" color="#102027" />
                           </View>
@@ -51,8 +60,10 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
             defaultValue={text}
             placeholder="Enter video url"/>
         </View>
-        <View style={styles.successtext}>
-        {wasSuccess && <Text style={{color: 'white'}}>{successText}</Text>}
+
+        <View style={styles.successtextview}>
+        
+        {hasMessage && <Text style={styles.successtext}>{successText}</Text>}
         </View>
         <View style={styles.convertbuttonview}>
           <TouchableOpacity
