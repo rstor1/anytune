@@ -59,6 +59,27 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     height: '5%'
   },
+  playerbuttonview: {
+    position: 'absolute',
+    width: '40%',
+    top: '58%',
+    zIndex: 1000,
+    height: '5%'
+  },
+  // Todo: put duplicate code in single class...
+  playerbutton: {
+    shadowColor: 'rgba(0,0,0, .4)', // IOS
+    shadowOffset: { height: 1, width: 1 }, // IOS
+    shadowOpacity: 2, // IOS
+    shadowRadius: 3, //IOS
+    color: "#97abb5",
+    backgroundColor: '#97abb5',
+    elevation: 2, // Android
+    height: 50,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   convertbutton: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS
     shadowOffset: { height: 1, width: 1 }, // IOS
@@ -81,19 +102,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  successtext: {
-
-  },
-  successtextview: {
+  messagetext: {
     position: 'absolute',
-    top: '45%',
+    top: '120%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',  
-    width: '100%',
-    height: '5%',
+    backgroundColor: 'transparent',
     zIndex: 1000
-  }
+  },
+
   });
 
 const container = StyleSheet.compose(
@@ -106,7 +123,6 @@ const container = StyleSheet.compose(
   styles.midline,
   styles.convertbutton,
   styles.activitycontainer,
-  styles.spacer,
-  styles.successtext);
+  styles.messagetext);
 
 export default styles;
