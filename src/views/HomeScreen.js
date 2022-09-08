@@ -7,17 +7,17 @@ import { getMp3Link }  from './../routes/getMp3';
 import { downloadFile } from './../utils/downloadFile';
 
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMessage, setHasMessage] = useState(false);
-  const [successText, setSuccessText] = useState('');
+  const [messageText, setMessageText] = useState('');
   const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
 
   function onPressConvert() {
     if (text === undefined || text === "" || text === null || !validateUrl(text)) {
       setHasMessage(true);
-      setSuccessText('Please enter a valid url');
+      setMessageText('Please enter a valid url');
     } else {
       setIsLoading(true);
       setDownloadButtonDisabled(true);
@@ -28,7 +28,7 @@ const HomeScreen = () => {
           downloadFile(response.data).then((result) => {
             if (result == 200) {
               setHasMessage(true);
-              setSuccessText('Download complete!');
+              setMessageText('Download complete!');
             } 
           }).then(() => {
             setIsLoading(false);
@@ -38,12 +38,17 @@ const HomeScreen = () => {
           setIsLoading(false);
           setHasMessage(false);
           setDownloadButtonDisabled(false);
-          setSuccessText('Download failed. Please try again.');
+          setMessageText('Download failed. Please try again.');
         }
       }).catch((error) => {
         console.log('error: ', error);
       })
     }
+  };
+
+  function onPressPlayer() {
+    navigation.navigate('Player', { name: 'Player' });
+    setMessageText('');
   };
 
 let activityIndicator =  <View style={[styles.activitycontainer]}>
@@ -63,11 +68,9 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
             onChangeText={newText => setText(newText)}
             defaultValue={text}
             placeholder="Enter video url"/>
-        </View>
-
-        <View style={styles.successtextview}>
         
-        {hasMessage && <Text style={styles.successtext}>{successText}</Text>}
+        {hasMessage && <Text style={styles.messagetext}>{messageText}</Text>}
+
         </View>
         <View style={styles.convertbuttonview}>
           <TouchableOpacity
@@ -77,13 +80,15 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
           >
            <Text style={{color: 'white'}}>Download</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-              // style={styles.convertbutton}
-              // onPress={onPressConvert}
+          </View>
+          <View style={styles.playerbuttonview}>
+          <TouchableOpacity
+              style={styles.playerbutton}
+              onPress={onPressPlayer}
           >
-           <Text style={{color: 'white'}}>Player</Text>
-          </TouchableOpacity> */}
-        </View>
+           <Text style={{color: 'black'}}>Player</Text>
+          </TouchableOpacity>
+          </View>
               <View style={styles.bottomcontainer}>
                 <Text style={styles.brandfont}></Text>
         </View>
