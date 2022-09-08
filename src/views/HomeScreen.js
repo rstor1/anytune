@@ -9,6 +9,8 @@ import { downloadFile } from './../utils/downloadFile';
 const HomeScreen = () => {
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [wasSuccess, setWasSuccess] = useState(false);
+  const [successText, setSuccessText] = useState('');
 
   function onPressConvert() {
     setIsLoading(true);
@@ -17,7 +19,10 @@ const HomeScreen = () => {
       setText('');
       if (response != null) {
         downloadFile(response.data).then((result) => {
-          //console.log(result);
+          if (result == 200) {
+            setWasSuccess(true);
+            setSuccessText('Success!');
+          } 
         }).then(() => {
           setIsLoading(false);
         });
@@ -46,6 +51,9 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
             defaultValue={text}
             placeholder="Enter video url"/>
         </View>
+        <View style={styles.successtext}>
+        {wasSuccess && <Text style={{color: 'white'}}>{successText}</Text>}
+        </View>
         <View style={styles.convertbuttonview}>
           <TouchableOpacity
               style={styles.convertbutton}
@@ -53,7 +61,12 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
           >
            <Text style={{color: 'white'}}>Download</Text>
           </TouchableOpacity>
-            {/* TODO: Add button to navigate to player page */}
+          {/* <TouchableOpacity
+              // style={styles.convertbutton}
+              // onPress={onPressConvert}
+          >
+           <Text style={{color: 'white'}}>Player</Text>
+          </TouchableOpacity> */}
         </View>
               <View style={styles.bottomcontainer}>
                 <Text style={styles.brandfont}></Text>

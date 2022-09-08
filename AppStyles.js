@@ -82,6 +82,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  successtext: {
+    position: 'absolute',
+    // left: 0,
+    // right: 0,
+    top: 100,
+    // bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center'
   }
   });
 
