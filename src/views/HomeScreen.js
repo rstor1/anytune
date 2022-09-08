@@ -12,6 +12,7 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMessage, setHasMessage] = useState(false);
   const [successText, setSuccessText] = useState('');
+  const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
 
   function onPressConvert() {
     if (text === undefined || text === "" || text === null || !validateUrl(text)) {
@@ -19,6 +20,7 @@ const HomeScreen = () => {
       setSuccessText('Please enter a valid url');
     } else {
       setIsLoading(true);
+      setDownloadButtonDisabled(true);
       //send to api in routes (GET) request
       getMp3Link(text).then((response) => {
         setText('');
@@ -30,10 +32,12 @@ const HomeScreen = () => {
             } 
           }).then(() => {
             setIsLoading(false);
+            setDownloadButtonDisabled(false);
           });
         } else {
           setIsLoading(false);
           setHasMessage(false);
+          setDownloadButtonDisabled(false);
           setSuccessText('Download failed. Please try again.');
         }
       }).catch((error) => {
@@ -69,6 +73,7 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
           <TouchableOpacity
               style={styles.convertbutton}
               onPress={onPressConvert}
+              disabled={downloadButtonDisabled}
           >
            <Text style={{color: 'white'}}>Download</Text>
           </TouchableOpacity>
