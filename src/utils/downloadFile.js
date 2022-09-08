@@ -16,8 +16,6 @@ export const downloadFile = (data) =>  {
         //some headers ..
     })
     .then((res) => {
-        // the temp file path
-        console.log('The file saved to ', res.path())
         resolve(res.respInfo.status);
     })
       .catch((e) => {
