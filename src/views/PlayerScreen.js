@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleSheet } from 'react-native';
 import { getAllTracks } from './../utils/getTracks';
 import TrackPlayer, {
@@ -13,40 +13,49 @@ useTrackPlayerEvents
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
 
+
 const PlayerScreen = ({ navigation }) => {
-    const [tracks, setTracks] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
+    const [playerTracks, setPlayerTracks] = useState([]);
+    const [tracksArr, setTracksArr] = useState([]);
+    let tracks = useRef([]);
 
 
-    React.useEffect(() => {  
+    useEffect(() => {  
           getAllTracks().then((results) => {
             if (results.length !== 0) {
-                setTracks(results);
+                tracks = results;
+                addTracksToPlayer(tracks).then((data) => {
+                  setPlayerTracks(data);
+                })
             }
            }).catch((error) => {
             console.log(error);
            });
+          
       }, []);
 
-      if (tracks.length != 0) {
-        console.log('tracks: ', tracks);
+      const addTracksToPlayer = async(data) => {
+        const dirs = ReactNativeBlobUtil.fs.dirs;
+        const arr = [];
+        // First remove .DS Store elememt
+        data.slice(1).forEach((data, index) => {
+          const track = {
+            id: index,
+            url: 'file:///' + dirs.DocumentDir + '/tracks/'+ data, // Load media from the file system
+        };
+        arr.push(track);
+          
+        });
+        setTracksArr(arr);
+        await TrackPlayer.add(arr);
       }
 
-      // const addTracksToPlayer = async(files) => {
-      //   await TrackPlayer.setupPlayer();
-      //   const dirs = ReactNativeBlobUtil.fs.dirs;
-      //   files.forEach((file, index) => {
-      //     // id: uuid.v4(),
-      //     // url: {uri:"file://"+dirs.DocumentDir+'/tracks/'+file[index]},
-      //     const track = {
-      //       id: index,
-      //       url: 'file:///' + dirs.DocumentDir + '/tracks/'+ file[index], // Load media from the file system
-
-      //   };
-      //   await TrackPlayer.add(track);
-          
-      //   });
-      // }
+      const playTrack = async(item) => {
+        setSelectedId(item.id);
+        await TrackPlayer.play();
+        let trackIndex = await TrackPlayer.getCurrentTrack();
+      }
 
       const Item = ({ item, onPress, backgroundColor, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
@@ -62,7 +71,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <Item
         item={item}
-        onPress={() => setSelectedId(item.id)}
+        onPress={() => playTrack(item)}
         backgroundColor={{ backgroundColor }}
         textColor={{ color }}
       />
@@ -72,7 +81,7 @@ const PlayerScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={tracks}
+        data={tracksArr}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         extraData={selectedId}
