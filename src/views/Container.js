@@ -12,7 +12,13 @@ export default function Container() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Player" component={PlayerScreen} />
+      <Stack.Screen name="Player" component={PlayerScreen}   
+      options={{
+          headerStyle: {
+            backgroundColor: 'black'
+          },
+          headerTintColor: '#fff',
+  }}/>
     </Stack.Navigator>
   );
 }
