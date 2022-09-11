@@ -21,6 +21,7 @@ const PlayerScreen = ({ navigation }) => {
     const [queueTracks, setQueueTracks] = useState([]);
     let tracks = useRef([]);
     const playbackState = usePlaybackState();
+    
 
 
     useEffect(() => {  
@@ -89,7 +90,7 @@ const PlayerScreen = ({ navigation }) => {
 
 
   const renderItem = ({ item }) => {
-    const backgroundColor = item.id === selectedId ? "#6e3b6e" : "#f9c2ff";
+    const backgroundColor = item.id === selectedId ? "#97abb5" : "#97abb5";
     const color = item.id === selectedId ? 'white' : 'black';
 
     return (
@@ -104,6 +105,7 @@ const PlayerScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content"/>
       <FlatList
         data={tracksArr}
         renderItem={renderItem}
@@ -118,6 +120,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: StatusBar.currentHeight || 0,
+    backgroundColor: '#102027'
   },
   item: {
     padding: 20,
