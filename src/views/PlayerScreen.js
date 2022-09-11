@@ -57,6 +57,7 @@ const PlayerScreen = ({ navigation }) => {
         await TrackPlayer.add(arr);
       }
 
+      // TODO: Fix when clicking on another track while one is playing, it resets and does not play.
       const togglePlayBack = async (playbackState, item) => {
         const currentTrack = await TrackPlayer.getCurrentTrack();
         if (playbackState == 'none' && currentTrack == null && item != null) {
@@ -82,11 +83,11 @@ const PlayerScreen = ({ navigation }) => {
 
       }
 
-      const Item = ({ item, onPress, backgroundColor, textColor }) => (
+  const Item = ({ item, onPress, backgroundColor, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
           <Text style={[styles.title, textColor]}>{item.title}</Text>
         </TouchableOpacity>
-      );
+  );
 
 
   const renderItem = ({ item }) => {
