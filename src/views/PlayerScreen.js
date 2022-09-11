@@ -18,7 +18,9 @@ const PlayerScreen = ({ navigation }) => {
     const [selectedId, setSelectedId] = useState(null);
     const [playerTracks, setPlayerTracks] = useState([]);
     const [tracksArr, setTracksArr] = useState([]);
+    const [queueTracks, setQueueTracks] = useState([]);
     let tracks = useRef([]);
+    const playbackState = usePlaybackState();
 
 
     useEffect(() => {  
@@ -26,7 +28,9 @@ const PlayerScreen = ({ navigation }) => {
             if (results.length !== 0) {
                 tracks = results;
                 addTracksToPlayer(tracks).then((data) => {
-                  setPlayerTracks(data);
+                  //So far do nothing here...
+                  //setPlayerTracks(data);
+                  //setQueueTracks(data);
                 })
             }
            }).catch((error) => {
@@ -39,22 +43,42 @@ const PlayerScreen = ({ navigation }) => {
         const dirs = ReactNativeBlobUtil.fs.dirs;
         const arr = [];
         // First remove .DS Store elememt
-        data.slice(1).forEach((data, index) => {
+        data.slice(1).forEach((item, index) => {
           const track = {
             id: index,
-            url: 'file:///' + dirs.DocumentDir + '/tracks/'+ data, // Load media from the file system
+            url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
         };
         arr.push(track);
           
         });
         setTracksArr(arr);
+        setPlayerTracks(arr);
         await TrackPlayer.add(arr);
       }
 
-      const playTrack = async(item) => {
-        setSelectedId(item.id);
-        await TrackPlayer.play();
-        let trackIndex = await TrackPlayer.getCurrentTrack();
+      const togglePlayBack = async (playbackState, item) => {
+        const currentTrack = await TrackPlayer.getCurrentTrack();
+        if (playbackState == 'none' && currentTrack == null && item != null) {
+          const dirs = ReactNativeBlobUtil.fs.dirs;
+          const arr = [];
+          const track = {
+            id: item.id,
+            url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item,
+          }
+          arr.push(item);
+          await TrackPlayer.add(arr);
+          await TrackPlayer.play();
+        } else {
+          if (currentTrack != null) {
+            if (playbackState == State.Playing) {
+              await TrackPlayer.reset();
+            } else {
+              await TrackPlayer.play();
+  
+            }
+          }
+        }
+
       }
 
       const Item = ({ item, onPress, backgroundColor, textColor }) => (
@@ -71,7 +95,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <Item
         item={item}
-        onPress={() => playTrack(item)}
+        onPress={() => togglePlayBack(playbackState, item)}
         backgroundColor={{ backgroundColor }}
         textColor={{ color }}
       />
