@@ -65,22 +65,35 @@ const PlayerScreen = ({ navigation }) => {
         setSelectedId(item.id);
         const currentTrack = await TrackPlayer.getCurrentTrack();
 
+        if (playbackState == State.Paused) {
+          if (currentIdPlaying != item.id) {
+            await setTrackToPlay(item);
+            return;
+          } else {
+            await TrackPlayer.play();
+            return;
+          }
+        }
         if (playbackState == State.None && currentTrack == null && item != null && currentTrack != item.id) {
           await setTrackToPlay(item);
+          return;
         }
         if (playbackState == State.Playing && currentTrack != null && item != null && currentIdPlaying != item.id) {
-          await TrackPlayer.reset();
           await setTrackToPlay(item);
+          return;
         } 
         if (playbackState == State.Playing && currentTrack != null && item != null && currentIdPlaying == item.id) {
-          await TrackPlayer.reset();
+          await TrackPlayer.pause();
+          return;
         } 
         if (playbackState == State.Ready && currentTrack != null && item != null) {
           await setTrackToPlay(item);
+          return;
         }
       }
 
   const setTrackToPlay = async (item) => {
+    await TrackPlayer.reset();
     const arr = [];
     const dirs = ReactNativeBlobUtil.fs.dirs;
     const track = {
