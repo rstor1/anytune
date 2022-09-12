@@ -4,11 +4,9 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   maincontainer: {
     flexDirection: 'column',
-    //justifyContent: 'flex-start',
     alignItems: 'center',
   },
   topcontainer: {
-    //flexDirection: 'row',
     width: '100%',
     height: '40%',
     justifyContent: 'center',
@@ -16,7 +14,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#102027'
   },
   bottomcontainer: {
-    //flexDirection: 'row',
     width: '100%',
     height: '70%',
     backgroundColor: 'white'//'#000000',
@@ -67,6 +64,7 @@ const styles = StyleSheet.create({
     height: '5%'
   },
   // Todo: put duplicate code in single class...
+  //https://www.reactnative.guide/8-styling/8.2-common-styles-mixins.html
   playerbutton: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS
     shadowOffset: { height: 1, width: 1 }, // IOS
@@ -78,7 +76,8 @@ const styles = StyleSheet.create({
     height: 50,
     height: '100%',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    borderRadius: 5
   },
   convertbutton: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS
@@ -91,7 +90,8 @@ const styles = StyleSheet.create({
     height: 50,
     height: '100%',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    borderRadius: 5
   },
   activitycontainer: {
     position: 'absolute',

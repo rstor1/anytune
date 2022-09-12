@@ -136,13 +136,16 @@ const PlayerScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         extraData={selectedId}
       />
+      <View style={styles.footer}></View>
     </SafeAreaView>
+    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-between',
     marginTop: StatusBar.currentHeight || 0,
     backgroundColor: '#102027'
   },
@@ -150,10 +153,16 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
+    borderRadius: 5
   },
   title: {
     fontSize: 15,
   },
+  footer: {
+    flex: 0.1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'black'
+}
 });
 
 export default PlayerScreen;
