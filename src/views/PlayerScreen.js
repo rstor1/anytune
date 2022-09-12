@@ -13,7 +13,6 @@ useTrackPlayerEvents
 import ReactNativeBlobUtil from 'react-native-blob-util';
 
 
-
 const PlayerScreen = ({ navigation }) => {
     const [selectedId, setSelectedId] = useState(null);
     const [playerTracks, setPlayerTracks] = useState([]);
@@ -21,8 +20,8 @@ const PlayerScreen = ({ navigation }) => {
     const [queueTracks, setQueueTracks] = useState([]);
     let tracks = useRef([]);
     const playbackState = usePlaybackState();
+    const [currentIdPlaying, setCurrentIdPlaying] = useState(-1);
     
-
 
     useEffect(() => {  
           getAllTracks().then((results) => {
@@ -57,31 +56,36 @@ const PlayerScreen = ({ navigation }) => {
         await TrackPlayer.add(arr);
       }
 
-      // TODO: Fix when clicking on another track while one is playing, it resets and does not play.
       const togglePlayBack = async (playbackState, item) => {
         const currentTrack = await TrackPlayer.getCurrentTrack();
-        if (playbackState == 'none' && currentTrack == null && item != null) {
-          const dirs = ReactNativeBlobUtil.fs.dirs;
-          const arr = [];
-          const track = {
-            id: item.id,
-            url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item,
-          }
-          arr.push(item);
-          await TrackPlayer.add(arr);
-          await TrackPlayer.play();
-        } else {
-          if (currentTrack != null) {
-            if (playbackState == State.Playing) {
-              await TrackPlayer.reset();
-            } else {
-              await TrackPlayer.play();
-  
-            }
-          }
-        }
 
+        if (playbackState == State.None && currentTrack == null && item != null && currentTrack != item.id) {
+          await setTrackToPlay(item);
+        }
+        if (playbackState == State.Playing && currentTrack != null && item != null && currentIdPlaying != item.id) {
+          await TrackPlayer.reset();
+          await setTrackToPlay(item);
+        } 
+        if (playbackState == State.Playing && currentTrack != null && item != null && currentIdPlaying == item.id) {
+          await TrackPlayer.reset();
+        } 
+        if (playbackState == State.Ready && currentTrack != null && item != null) {
+          await setTrackToPlay(item);
+        }
       }
+
+  const setTrackToPlay = async (item) => {
+    const arr = [];
+    const dirs = ReactNativeBlobUtil.fs.dirs;
+    const track = {
+      id: item.id,
+      url: 'file:///'+dirs.DocumentDir+'/tracks/'+item,
+    }
+    arr.push(item);
+    await TrackPlayer.add(arr);
+    setCurrentIdPlaying(item.id);
+    await TrackPlayer.play();
+  }
 
   const Item = ({ item, onPress, backgroundColor, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
