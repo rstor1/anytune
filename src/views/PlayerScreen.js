@@ -29,8 +29,8 @@ const PlayerScreen = ({ navigation }) => {
                 tracks = results;
                 addTracksToPlayer(tracks).then((data) => {
                   //So far do nothing here...
-                  //setPlayerTracks(data);
-                  //setQueueTracks(data);
+                  // setPlayerTracks(data);
+                  // setQueueTracks(data);
                 })
             }
            }).catch((error) => {
@@ -42,11 +42,16 @@ const PlayerScreen = ({ navigation }) => {
       const addTracksToPlayer = async(data) => {
         const dirs = ReactNativeBlobUtil.fs.dirs;
         const arr = [];
+        let title = '';
         // First remove .DS Store elememt
-        data.slice(1).forEach((item, index) => {
+        data.forEach((item, index) => {
+          // if (item.url != undefined) {
+          //   title = item.url.replace(/\.[^/.]+$/, "");
+          // }
           const track = {
-            id: index,
+            id: index+1,
             url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
+            title: item.replace(/\.[^/.]+$/, "")
         };
         arr.push(track);
           
@@ -57,6 +62,7 @@ const PlayerScreen = ({ navigation }) => {
       }
 
       const togglePlayBack = async (playbackState, item) => {
+        setSelectedId(item.id);
         const currentTrack = await TrackPlayer.getCurrentTrack();
 
         if (playbackState == State.None && currentTrack == null && item != null && currentTrack != item.id) {
@@ -89,7 +95,7 @@ const PlayerScreen = ({ navigation }) => {
 
   const Item = ({ item, onPress, backgroundColor, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
-          <Text style={[styles.title, textColor]}>{item.title}</Text>
+          <Text style={[styles.title, textColor]}>{item.id} - {item.title}</Text>
         </TouchableOpacity>
   );
 
@@ -133,7 +139,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   title: {
-    fontSize: 32,
+    fontSize: 15,
   },
 });
 
