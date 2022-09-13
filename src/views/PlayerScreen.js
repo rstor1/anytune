@@ -151,10 +151,23 @@ const PlayerScreen = ({ navigation }) => {
         extraData={selectedId}
       />
       <View style={styles.footer}>
+      <Icon 
+        style={styles.skipbackicon}
+        name={'ios-play-skip-back-outline'}
+        color="white" 
+        //onPress={() => ()}
+        size={40}/>
         <Icon 
+        style={styles.playicon}
         name={playPauseIcon}
         color="white" 
         onPress={() => playPauseQueue(playbackState)}
+        size={40}/>
+        <Icon 
+        style={styles.skipforwardicon}
+        name={'ios-play-skip-forward-outline'}
+        color="white" 
+        //onPress={() => ()}
         size={40}/>
       </View>
     </SafeAreaView>
@@ -171,20 +184,35 @@ const styles = StyleSheet.create({
   },
   item: {
     padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    marginVertical: 3,
+    marginHorizontal: 10,
     borderRadius: 5
   },
   title: {
     fontSize: 15,
   },
   footer: {
+    flexDirection: 'row',
     flex: 0.15,
-    justifyContent: 'flex-end',
     backgroundColor: 'black',
     alignItems: 'center',
-    justifyContent: 'center'
-}
+    justifyContent: 'center',
+  },
+  skipbackicon: {
+    flexGrow: 0.1,
+    //flexShrink: 2,
+    flexBasis: 25,
+  },
+  playicon: {
+    flexGrow: 0.1,
+    //flexShrink: 2,
+    flexBasis: 20,
+  },
+  skipforwardicon: {
+    flexGrow: 0.1,
+    //flexShrink: 2,
+    flexBasis: 20,
+  }
 });
 
 export default PlayerScreen;
