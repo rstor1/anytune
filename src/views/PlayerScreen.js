@@ -11,6 +11,7 @@ useProgress,
 useTrackPlayerEvents
 } from 'react-native-track-player';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 
 const PlayerScreen = ({ navigation }) => {
@@ -20,6 +21,7 @@ const PlayerScreen = ({ navigation }) => {
     const [queueTracks, setQueueTracks] = useState([]);
     let tracks = useRef([]);
     const playbackState = usePlaybackState();
+    //const trackPlayerEvents = useTrackPlayerEvents();
     const [currentIdPlaying, setCurrentIdPlaying] = useState(-1);
     
 
@@ -43,18 +45,14 @@ const PlayerScreen = ({ navigation }) => {
         const dirs = ReactNativeBlobUtil.fs.dirs;
         const arr = [];
         let title = '';
-        // First remove .DS Store elememt
+        // First remove .DS Store elememt?
         data.forEach((item, index) => {
-          // if (item.url != undefined) {
-          //   title = item.url.replace(/\.[^/.]+$/, "");
-          // }
           const track = {
             id: index+1,
             url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
             title: item.replace(/\.[^/.]+$/, "")
         };
         arr.push(track);
-          
         });
         setTracksArr(arr);
         setPlayerTracks(arr);
@@ -91,6 +89,10 @@ const PlayerScreen = ({ navigation }) => {
           return;
         }
       }
+    
+  const playButton = async (playbackState) => {
+    console.log('playbackstate: ', playbackState);
+  }
 
   const setTrackToPlay = async (item) => {
     await TrackPlayer.reset();
@@ -136,7 +138,13 @@ const PlayerScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         extraData={selectedId}
       />
-      <View style={styles.footer}></View>
+      <View style={styles.footer}>
+        <Icon 
+        name="play-outline" 
+        color="white" 
+        onPress={() => playButton(playbackState)}
+        size={40}/>
+      </View>
     </SafeAreaView>
     
   );
@@ -159,9 +167,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   footer: {
-    flex: 0.1,
+    flex: 0.15,
     justifyContent: 'flex-end',
-    backgroundColor: 'black'
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center'
 }
 });
 
