@@ -23,6 +23,7 @@ const PlayerScreen = ({ navigation }) => {
     const playbackState = usePlaybackState();
     //const trackPlayerEvents = useTrackPlayerEvents();
     const [currentIdPlaying, setCurrentIdPlaying] = useState(-1);
+    const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     
 
     useEffect(() => {  
@@ -59,7 +60,7 @@ const PlayerScreen = ({ navigation }) => {
         await TrackPlayer.add(arr);
       }
 
-      const togglePlayBack = async (playbackState, item) => {
+      const singleTrackPlayBack = async (playbackState, item) => {
         setSelectedId(item.id);
         const currentTrack = await TrackPlayer.getCurrentTrack();
 
@@ -90,8 +91,19 @@ const PlayerScreen = ({ navigation }) => {
         }
       }
     
-  const playButton = async (playbackState) => {
-    console.log('playbackstate: ', playbackState);
+  const playPauseQueue = async (playbackState) => {
+    if (playbackState == State.Paused) {
+      setplayPauseIcon('ios-pause-outline');
+      await TrackPlayer.play();
+    }
+    if (playbackState == State.Playing) {
+      setplayPauseIcon('ios-play-outline');
+      await TrackPlayer.pause();
+    }
+    if (playbackState == State.Ready) {
+      setplayPauseIcon('ios-pause-outline');
+      await TrackPlayer.play();
+    }
   }
 
   const setTrackToPlay = async (item) => {
@@ -122,7 +134,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <Item
         item={item}
-        onPress={() => togglePlayBack(playbackState, item)}
+        onPress={() => singleTrackPlayBack(playbackState, item)}
         backgroundColor={{ backgroundColor }}
         textColor={{ color }}
       />
@@ -140,9 +152,9 @@ const PlayerScreen = ({ navigation }) => {
       />
       <View style={styles.footer}>
         <Icon 
-        name="play-outline" 
+        name={playPauseIcon}
         color="white" 
-        onPress={() => playButton(playbackState)}
+        onPress={() => playPauseQueue(playbackState)}
         size={40}/>
       </View>
     </SafeAreaView>
