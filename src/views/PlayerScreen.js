@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleSheet } from 'react-native';
+import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleSheet, Animated } from 'react-native';
 import { getAllTracks } from './../utils/getTracks';
 import TrackPlayer, {
 Capability,
@@ -24,6 +24,7 @@ const PlayerScreen = ({ navigation }) => {
     //const trackPlayerEvents = useTrackPlayerEvents();
     const [currentIdPlaying, setCurrentIdPlaying] = useState(-1);
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
+    const animation = useRef(new Animated.Value(-80)).current;
     
 
     useEffect(() => {  
@@ -41,6 +42,15 @@ const PlayerScreen = ({ navigation }) => {
            });
           
       }, []);
+
+      const startAnimation = () => {
+        Animated.loop(
+        Animated.timing(animation, {
+          toValue: 500,
+          duration: 10000,
+          useNativeDriver: true,
+        })).start();
+      }
 
       const addTracksToPlayer = async(data) => {
         const dirs = ReactNativeBlobUtil.fs.dirs;
@@ -101,9 +111,31 @@ const PlayerScreen = ({ navigation }) => {
       await TrackPlayer.pause();
     }
     if (playbackState == State.Ready) {
+      startAnimation();
       setplayPauseIcon('ios-pause-outline');
       await TrackPlayer.play();
     }
+  }
+
+  const skipBack = async (playbackState) => {
+    if (playbackState == State.Playing) {
+      const current = await TrackPlayer.getCurrentTrack();
+      if (current != 0) {
+        await TrackPlayer.skipToPrevious();
+      }
+    }
+  }
+
+  const skipForward = async (playbackState) => {
+    if (playbackState == State.Playing) {
+      await TrackPlayer.skipToNext();
+    }
+  }
+
+  const shuffle = async () => {
+    var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+    setplayPauseIcon('ios-pause-outline');
+    await setTrackToPlay(item);
   }
 
   const setTrackToPlay = async (item) => {
@@ -130,6 +162,7 @@ const PlayerScreen = ({ navigation }) => {
   const renderItem = ({ item }) => {
     const backgroundColor = item.id === selectedId ? "#97abb5" : "#97abb5";
     const color = item.id === selectedId ? 'white' : 'black';
+  
 
     return (
       <Item
@@ -150,12 +183,13 @@ const PlayerScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         extraData={selectedId}
       />
+      <Animated.Text style={[styles.box, {transform: [{ translateX: animation }]}]}>Song title</Animated.Text>
       <View style={styles.footer}>
       <Icon 
         style={styles.skipbackicon}
         name={'ios-play-skip-back-outline'}
         color="white" 
-        //onPress={() => ()}
+        onPress={() => skipBack(playbackState)}
         size={40}/>
         <Icon 
         style={styles.playicon}
@@ -167,9 +201,16 @@ const PlayerScreen = ({ navigation }) => {
         style={styles.skipforwardicon}
         name={'ios-play-skip-forward-outline'}
         color="white" 
-        //onPress={() => ()}
+        onPress={() => skipForward(playbackState)}
+        size={40}/>
+        <Icon 
+        style={styles.shuffleicon}
+        name={'ios-shuffle-outline'}
+        color="white" 
+        onPress={() => shuffle()}
         size={40}/>
       </View>
+      {/* <TouchableOpacity style={styles.button} onPress={() => startAnimation()}></TouchableOpacity> */}      
     </SafeAreaView>
     
   );
@@ -200,19 +241,28 @@ const styles = StyleSheet.create({
   },
   skipbackicon: {
     flexGrow: 0.1,
-    //flexShrink: 2,
     flexBasis: 25,
   },
   playicon: {
     flexGrow: 0.1,
-    //flexShrink: 2,
     flexBasis: 20,
   },
   skipforwardicon: {
     flexGrow: 0.1,
-    //flexShrink: 2,
     flexBasis: 20,
-  }
+  },
+  shuffleicon: {
+    flexGrow: 0.1,
+    flexBasis: 20,
+  },
+  button: {
+    backgroundColor: 'black',
+    flex: 0.3,
+    alignItems: 'center'
+  },
+  box: {
+    color: 'white'
+  },
 });
 
 export default PlayerScreen;
