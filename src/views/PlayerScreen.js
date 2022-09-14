@@ -25,6 +25,7 @@ const PlayerScreen = ({ navigation }) => {
     const [currentIdPlaying, setCurrentIdPlaying] = useState(-1);
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(-80)).current;
+    const [songTitle, setSongTitle] = useState('');
     
 
     useEffect(() => {  
@@ -50,6 +51,13 @@ const PlayerScreen = ({ navigation }) => {
           duration: 10000,
           useNativeDriver: true,
         })).start();
+      }
+
+      const stopAnimation = () => {
+        animation.setValue(-80);
+        Animated.timing(
+          animation
+        ).stop();
       }
 
       const addTracksToPlayer = async(data) => {
@@ -104,13 +112,19 @@ const PlayerScreen = ({ navigation }) => {
   const playPauseQueue = async (playbackState) => {
     if (playbackState == State.Paused) {
       setplayPauseIcon('ios-pause-outline');
+      setSongTitle('Song title');
+      startAnimation();
       await TrackPlayer.play();
     }
     if (playbackState == State.Playing) {
       setplayPauseIcon('ios-play-outline');
       await TrackPlayer.pause();
+      setSongTitle('');
+      stopAnimation();
     }
     if (playbackState == State.Ready) {
+      setSongTitle('Song title');
+      setSongTitle('Song title');
       startAnimation();
       setplayPauseIcon('ios-pause-outline');
       await TrackPlayer.play();
@@ -183,7 +197,7 @@ const PlayerScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         extraData={selectedId}
       />
-      <Animated.Text style={[styles.box, {transform: [{ translateX: animation }]}]}>Song title</Animated.Text>
+      <Animated.Text style={[styles.box, {transform: [{ translateX: animation }]}]}>{songTitle}</Animated.Text>
       <View style={styles.footer}>
       <Icon 
         style={styles.skipbackicon}
@@ -210,7 +224,6 @@ const PlayerScreen = ({ navigation }) => {
         onPress={() => shuffle()}
         size={40}/>
       </View>
-      {/* <TouchableOpacity style={styles.button} onPress={() => startAnimation()}></TouchableOpacity> */}      
     </SafeAreaView>
     
   );
