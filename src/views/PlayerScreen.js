@@ -20,7 +20,6 @@ const PlayerScreen = ({ navigation }) => {
     const [playerTracks, setPlayerTracks] = useState([]);
     const [tracksArr, setTracksArr] = useState([]);
     const [queueTracks, setQueueTracks] = useState([]);
-    let tracks = useRef([]);
     const playbackState = usePlaybackState();
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
@@ -30,6 +29,7 @@ const PlayerScreen = ({ navigation }) => {
     const [isShuffleOn, setIsShuffleOn] = useState(false);
     const currentTrackIdRef = useRef(-1);
     const songTitleRef = useRef('');
+    let tracks = useRef([]);
     
     
 
@@ -93,6 +93,8 @@ const PlayerScreen = ({ navigation }) => {
             startAnimation();
             setplayPauseIcon('ios-pause-outline');
           } else {
+            startAnimation();
+            setplayPauseIcon('ios-pause-outline');
             await TrackPlayer.play();
           }
         }
@@ -100,20 +102,24 @@ const PlayerScreen = ({ navigation }) => {
           await setCurrentSongTitle();
           startAnimation();
           await setTrackToPlay(item);
+          setplayPauseIcon('ios-pause-outline');
         }
         if (playbackState == State.Playing && currentTrack != null && item != null && currentTrackIdRef.current != item.id) {
           startAnimation();
           await setCurrentSongTitle();
           await setTrackToPlay(item);
+          setplayPauseIcon('ios-pause-outline');
         } 
         if (playbackState == State.Playing && currentTrack != null && item != null && currentTrackIdRef.current == item.id) {
           //setSongTitle('');
           stopAnimation();
           await TrackPlayer.pause();
+          setplayPauseIcon('ios-play-outline');
         } 
         if (playbackState == State.Ready && currentTrack != null && item != null) {
           await setCurrentSongTitle();       
           await setTrackToPlay(item);
+          setplayPauseIcon('ios-pause-outline');
           startAnimation();
         }
       }
@@ -130,8 +136,8 @@ const PlayerScreen = ({ navigation }) => {
     const playPauseQueue = async (playbackState) => {
       if (playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
-        startAnimation();
         await setCurrentSongTitle();
+        startAnimation();       
         await TrackPlayer.play();
       }
       if (playbackState == State.Playing) {
@@ -171,11 +177,17 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const shuffle = async () => {
-      var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
-      setplayPauseIcon('ios-pause-outline');
-      await setTrackToPlay(item);
-      setShuffleText('Shuffle On');
-      startAnimation();
+      if (isShuffleOn) {
+        setShuffleText('');
+        setIsShuffleOn(false);
+      } else {
+        var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+        setplayPauseIcon('ios-pause-outline');
+        await setTrackToPlay(item);
+        setShuffleText('Shuffle On');
+        startAnimation();
+        setIsShuffleOn(true);
+      }
     }
 
     const setTrackToPlay = async (item) => {
@@ -256,7 +268,7 @@ const PlayerScreen = ({ navigation }) => {
             onPress={() => shuffle()}
             size={40}
           />
-          <Text numberOfLines={1} style={styles.shuffletext}>{shuffleText}</Text>
+          {isShuffleOn && <Text numberOfLines={1} style={styles.shuffletext}>{shuffleText}</Text>}
         </View>
       </SafeAreaView>
     );
@@ -318,7 +330,7 @@ const styles = StyleSheet.create({
   titlemarquee: {
     flexDirection: 'row',
     justifyContent: 'center',
-    flex: 0.032,
+    flex: 0.036,
     backgroundColor: 'black',
   }
 });
