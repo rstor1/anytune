@@ -148,6 +148,9 @@ const PlayerScreen = ({ navigation }) => {
         setShuffleText('');
       }
       if (playbackState == State.Ready) {
+        if (currentTrackIdRef.current == -1) {
+          currentTrackIdRef.current = 1;
+        }
         await setCurrentSongTitle();
         startAnimation();
         setplayPauseIcon('ios-pause-outline');
@@ -156,23 +159,28 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const skipBack = async (playbackState) => {
-      if (playbackState == State.Playing) {
-        const current = await TrackPlayer.getCurrentTrack();
-        if (current != 0) {
-          await TrackPlayer.skipToPrevious();
+      if (playbackState == State.Playing || playbackState == State.Connecting) {
+        if ( currentTrackIdRef.current >= 2 ) {
+          let _currentId = currentTrackIdRef.current;
+          --_currentId;
+          let item = tracksArr.find((elem) => elem.id == _currentId);
+          await setTrackToPlay(item);
           await setCurrentSongTitle();
           startAnimation();
-          setShuffleText('');
         }
       }
     }
 
     const skipForward = async (playbackState) => {
-      if (playbackState == State.Playing) {
-        await TrackPlayer.skipToNext();
-        await setCurrentSongTitle();
-        startAnimation();
-        setShuffleText('');
+      if (playbackState == State.Playing || playbackState == State.Connecting) {
+        if (currentTrackIdRef.current < tracksArr.length) {
+          let _currentId = currentTrackIdRef.current;
+          ++_currentId;
+          let item = tracksArr.find((elem) => elem.id == _currentId);
+          await setTrackToPlay(item);
+          await setCurrentSongTitle();
+          startAnimation();
+        }
       }
     }
 
@@ -268,7 +276,22 @@ const PlayerScreen = ({ navigation }) => {
             onPress={() => shuffle()}
             size={40}
           />
-          {isShuffleOn && <Text numberOfLines={1} style={styles.shuffletext}>{shuffleText}</Text>}
+{/* TODO: make element variable for shuffle icon */}
+          <Text numberOfLines={1} style={styles.shuffletext}>
+            Shuffle{' '}
+            {isShuffleOn && <Icon 
+            style={styles.shuffleradio}
+            name={'ios-radio-button-on-outline'}
+            color={'#39f705'}
+            size={15}
+          />}
+            {!isShuffleOn && <Icon 
+            style={styles.shuffleradio}
+            name={'ios-radio-button-off-outline'}
+            color={'#97abb5'}
+            size={15}
+          />}
+            </Text>
         </View>
       </SafeAreaView>
     );
@@ -279,7 +302,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     marginTop: StatusBar.currentHeight || 0,
-    backgroundColor: '#102027'
+    backgroundColor: '#102027',
   },
   item: {
     padding: 20,
@@ -296,6 +319,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
+    flexWrap: 'wrap'
   },
   skipbackicon: {
     flexGrow: 0.1,
@@ -316,8 +340,9 @@ const styles = StyleSheet.create({
   shuffletext: {
     flexGrow: 0.2,
     flexBasis: 0,
-    color: '#39f705',
+    color: '#97abb5',
     fontSize: 12,
+    
   },
   button: {
     backgroundColor: 'black',
@@ -332,6 +357,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 0.036,
     backgroundColor: 'black',
+  },
+  shuffleradio: {
   }
 });
 
