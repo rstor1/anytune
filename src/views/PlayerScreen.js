@@ -30,7 +30,12 @@ const PlayerScreen = ({ navigation }) => {
     const currentTrackIdRef = useRef(-1);
     const songTitleRef = useRef('');
     let tracks = useRef([]);
-    
+    const events = [
+      //Event.PlaybackState,
+      Event.PlaybackError,
+      Event.PlaybackTrackChanged,
+      Event.PlaybackQueueEnded
+    ];
     
 
     useEffect(() => {  
@@ -49,6 +54,44 @@ const PlayerScreen = ({ navigation }) => {
           
       }, []);
 
+      useTrackPlayerEvents(events, (event) => {
+        console.log('event: ', event);
+        if (event.type === Event.PlaybackError) {
+          console.warn('An error occured while playing the current track.');
+        }
+          // TODO: fix this for when we hit pause it does not keep shuffle going....
+          if (event.type == Event.PlaybackTrackChanged) {
+            if (event.nextTrack != null) {
+              TrackPlayer.getTrack(event.nextTrack).then((track) => {
+                setSongTitleFromQueue(track).then(() =>{})
+              })
+            } else {
+              songTitleRef.current = '';
+              console.log('play outline being set...');
+              console.log('playbackstate: ', playbackState);
+              if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Playing) {
+                setplayPauseIcon('ios-pause-outline');
+              }
+              stopAnimation();
+          } 
+          if (event.type == Event.PlaybackQueueEnded) {
+            songTitleRef.current = '';
+            setplayPauseIcon('ios-play-outline');
+            stopAnimation();
+            TrackPlayer.reset().then(() => {});
+          }
+          }
+      });
+
+    const setSongTitleFromQueue = async (item) => {
+      if (item != null) {
+        songTitleRef.current = item.title;
+        animation.setValue(screen.width*-1);
+        startAnimation();
+      }
+
+    }
+
     const startAnimation = () => {
         Animated.loop(
         Animated.timing(animation, {
@@ -66,6 +109,11 @@ const PlayerScreen = ({ navigation }) => {
       }
 
     const addTracksToPlayer = async(data) => {
+      let _data = [];
+      const index = data.indexOf('.DS_Store');
+      if (index > -1) {
+        data.splice(index,1);
+      }
         const dirs = ReactNativeBlobUtil.fs.dirs;
         const arr = [];
         let title = '';
@@ -93,9 +141,10 @@ const PlayerScreen = ({ navigation }) => {
             startAnimation();
             setplayPauseIcon('ios-pause-outline');
           } else {
+            await setTrackToPlay(item);
             startAnimation();
             setplayPauseIcon('ios-pause-outline');
-            await TrackPlayer.play();
+            //await TrackPlayer.play();
           }
         }
         if (playbackState == State.None && currentTrack == null && item != null && currentTrack != item.id) {
@@ -132,12 +181,27 @@ const PlayerScreen = ({ navigation }) => {
         }
       });
     }
+
+    const setCurrentSongToPlay = async () => {
+      for (const item of tracksArr) {
+        if (item.id == currentTrackIdRef.current) {
+          await setTrackToPlay(item);
+          setplayPauseIcon('ios-pause-outline');
+        }
+      }
+      // async tracksArr.forEach((item) => {
+      //   if (item.id == currentTrackIdRef.current) {
+      //     await setTrackToPlay(item);
+      //   }
+      // });
+    }
     
     const playPauseQueue = async (playbackState) => {
       if (playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
         await setCurrentSongTitle();
-        startAnimation();       
+        startAnimation(); 
+        //await setCurrentSongToPlay();      
         await TrackPlayer.play();
       }
       if (playbackState == State.Playing) {
@@ -159,7 +223,15 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const skipBack = async (playbackState) => {
-      if (playbackState == State.Playing || playbackState == State.Connecting) {
+      // const current = await TrackPlayer.getCurrentTrack();
+      // let _current = current;
+      // --_current;
+      // const prevTrack = await TrackPlayer.getTrack(_current);
+      // if (prevTrack) {
+      //   await TrackPlayer.skipToPrevious();
+      // }
+      if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
+        setplayPauseIcon('ios-pause-outline');
         if ( currentTrackIdRef.current >= 2 ) {
           let _currentId = currentTrackIdRef.current;
           --_currentId;
@@ -172,7 +244,15 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const skipForward = async (playbackState) => {
-      if (playbackState == State.Playing || playbackState == State.Connecting) {
+      // const current = await TrackPlayer.getCurrentTrack();
+      // let _current = current;
+      // ++_current;
+      // const nextTrack = await TrackPlayer.getTrack(_current);
+      // if (nextTrack) {
+      //   await TrackPlayer.skipToNext();
+      // }
+      if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
+        setplayPauseIcon('ios-pause-outline');
         if (currentTrackIdRef.current < tracksArr.length) {
           let _currentId = currentTrackIdRef.current;
           ++_currentId;
@@ -189,13 +269,23 @@ const PlayerScreen = ({ navigation }) => {
         setShuffleText('');
         setIsShuffleOn(false);
       } else {
-        var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
-        setplayPauseIcon('ios-pause-outline');
-        await setTrackToPlay(item);
-        setShuffleText('Shuffle On');
-        startAnimation();
-        setIsShuffleOn(true);
+        await startShuffle();
+        // var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+        // setplayPauseIcon('ios-pause-outline');
+        // await setTrackToPlay(item);
+        // setShuffleText('Shuffle On');
+        // startAnimation();
+        // setIsShuffleOn(true);
       }
+    }
+
+    const startShuffle = async () => {
+      var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+      setplayPauseIcon('ios-pause-outline');
+      await setTrackToPlay(item);
+      setShuffleText('Shuffle On');
+      startAnimation();
+      setIsShuffleOn(true);
     }
 
     const setTrackToPlay = async (item) => {
