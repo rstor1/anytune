@@ -33,82 +33,44 @@ const PlayerScreen = ({ navigation }) => {
     const nextSongTitleRef = useRef('');
     let isPlayQueue = useRef(false);
     let isSingleTrackPlay = useRef(false);
+    let isSkipToNext = useRef(false);
     let tracks = useRef([]);
+
     const events = [
-      //Event.PlaybackState,
+      Event.PlaybackState,
       Event.PlaybackError,
-      Event.PlaybackTrackChanged,
-      Event.PlaybackQueueEnded
+      // Event.PlaybackTrackChanged,
+      // Event.PlaybackQueueEnded
     ];
 
-    const fetchNextTitle = () => {
-        TrackPlayer.getCurrentTrack().then((trackNum) => {
-          TrackPlayer.getTrack(++trackNum).then((track) => {
-            //currentTrackIdRef.current = track.id;
-            nextSongTitleRef.current = track.title;
-           console.log('next title: ', nextSongTitleRef.current);
-            //console.log('songTitleafter: ', songTitleRef.current)
-            // setCurrentSongTitle().then(() => {
-            //   startAnimation();
-
-            // });
-            //console.log('currentTrackIdAfter: ', currentTrackIdRef.current)
-          })
-          
-          //console.log('current: ', track);
-        }).catch(e => {
-          console.log(e);
-        });
-    }
-
     useEffect(() => {  
-
-      if (playbackState === State.Playing || playbackState === 3 || playbackState === State.Loading) {
-        if (isPlayQueue || isSingleTrackPlay) {
-          fetchNextTitle();
-          if (nextSongTitleRef.current != '') {
-            songTitleRef.current = nextSongTitleRef.current;
-          }
+      (async () => {
+        if (playbackState === State.Playing)  {
+          stopAnimation();
+          const current = await TrackPlayer.getCurrentTrack();
+          const track = await TrackPlayer.getTrack(current);
+          songTitleRef.current = track.title;
+          startAnimation();
         }
-        //console.log(nextSongTitleRef.current);
+        if (playbackState === State.Paused) {
+          stopAnimation();
+          await TrackPlayer.pause();
+        }
 
-        // console.log('playing');
-        // console.log('loading');
-        // console.log('song title: ', songTitleRef.current);
-        // console.log('currentTrackIdBefore: ', currentTrackIdRef.current)
-        // Update track title and trackIdref
-        //songTitleRef.current = '';
-        //stopAnimation();
-        //songTitleRef.current = 'hello';
-
-
-      } else if (playbackState === 'paused' || playbackState === 2) {
-        // console.log('paused');
-        // console.log('song title: ', songTitleRef.current)
-      } else if (playbackState === 'stopped') {
-          // console.log('stopped');
-          // console.log('song title: ', songTitleRef.current)
-      } else {
-        // console.log('loading');
-        // console.log('song title: ', songTitleRef.current)
-      }
-      console.log(songTitleRef.current);
-      //if (isInitialLoad.current) {
         getAllTracks().then((results) => {
           if (results.length !== 0) {
               tracks = results;
-              addTracksToPlayer(tracks).then((data) => {
-                //So far do nothing here...
-                // setPlayerTracks(data);
-                // setQueueTracks(data);
-              })
+              addTracksToPlayer(tracks).then(() => {});
           }
          }).catch((error) => {
           console.log(error);
          });
-      //}
-          
-      }, [playbackState]);
+      })();
+    
+      return () => {
+        // this now gets called when the component unmounts
+      };     
+      },[playbackState]);
     
 
       // useTrackPlayerEvents(events, (event) => {
@@ -121,37 +83,44 @@ const PlayerScreen = ({ navigation }) => {
       //   if (event.type === Event.PlaybackError) {
       //     console.warn('An error occured while playing the current track.');
       //   }
-      //     // TODO: fix this for when we hit pause it does not keep shuffle going....
-      //     if (event.type == Event.PlaybackTrackChanged && playbackState != Event.Paused) {
-      //       if (event.nextTrack != null) {
-      //         TrackPlayer.getTrack(event.nextTrack).then((track) => {
-      //           setSongTitleFromQueue(track).then(() =>{})
-      //         })
-      //       } 
-      //       else {
-      //         songTitleRef.current = '';
-      //         setplayPauseIcon('ios-play-outline');
-      //         stopAnimation();
-      //         //if (event.type == Event.PlaybackQueueEnded)
-      //         TrackPlayer.pause().then(() => {
-      //           TrackPlayer.reset().then(() => {});
-      //         });
-              
-      //         // console.log('play outline being set...');
-      //         // console.log('playbackstate: ', playbackState);
-      //         // if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Paused) {
-      //         //   //setplayPauseIcon('ios-play-outline');
-      //         // }
-      //         //stopAnimation();
-      //     } 
-        
-      //     // if (event.type == Event.PlaybackQueueEnded && playbackState == State.Playing) {
-      //     //   songTitleRef.current = '';
-      //     //   setplayPauseIcon('ios-play-outline');
-      //     //   stopAnimation();
-      //     //   TrackPlayer.reset().then(() => {});
-      //     // }
+      //   if (event.state === State.Playing) {
+      //       fetchTitle();
       //   }
+      //   if (event.state === State.Paused) {
+      //     stopAnimation();
+      //     setplayPauseIcon('ios-pause-outline');
+      //   }
+      //     // TODO: fix this for when we hit pause it does not keep shuffle going....
+      //   //   if (event.type == Event.PlaybackTrackChanged && playbackState != Event.Paused) {
+      //   //     if (event.nextTrack != null) {
+      //   //       TrackPlayer.getTrack(event.nextTrack).then((track) => {
+      //   //         setSongTitleFromQueue(track).then(() =>{})
+      //   //       })
+      //   //     } 
+      //   //     else {
+      //   //       songTitleRef.current = '';
+      //   //       setplayPauseIcon('ios-play-outline');
+      //   //       stopAnimation();
+      //   //       //if (event.type == Event.PlaybackQueueEnded)
+      //   //       TrackPlayer.pause().then(() => {
+      //   //         TrackPlayer.reset().then(() => {});
+      //   //       });
+              
+      //   //       // console.log('play outline being set...');
+      //   //       // console.log('playbackstate: ', playbackState);
+      //   //       // if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Paused) {
+      //   //       //   //setplayPauseIcon('ios-play-outline');
+      //   //       // }
+      //   //       //stopAnimation();
+      //   //   } 
+        
+      //   //   // if (event.type == Event.PlaybackQueueEnded && playbackState == State.Playing) {
+      //   //   //   songTitleRef.current = '';
+      //   //   //   setplayPauseIcon('ios-play-outline');
+      //   //   //   stopAnimation();
+      //   //   //   TrackPlayer.reset().then(() => {});
+      //   //   // }
+      //   // }
       // });
 
     const setSongTitleFromQueue = async (item) => {
@@ -160,7 +129,6 @@ const PlayerScreen = ({ navigation }) => {
         animation.setValue(screen.width*-1);
         startAnimation();
       }
-
     }
 
     const startAnimation = () => {
@@ -205,6 +173,7 @@ const PlayerScreen = ({ navigation }) => {
     const singleTrackPlayBack = async (playbackState, item) => {
         isSingleTrackPlay = true;
         isPlayQueue.current = false;
+        isSkipToNext.current = false;
 
         setSelectedId(item.id);
         const currentTrack = await TrackPlayer.getCurrentTrack();
@@ -273,9 +242,10 @@ const PlayerScreen = ({ navigation }) => {
     const playPauseQueue = async (playbackState) => {
       isSingleTrackPlay = false;
       isPlayQueue.current = true;
+      isSkipToNext.current = false;
       if (playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
-        await setCurrentSongTitle();
+        //await setCurrentSongTitle();
         startAnimation(); 
         await TrackPlayer.play();
       }
@@ -319,23 +289,25 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const skipForward = async (playbackState) => {
-      // const current = await TrackPlayer.getCurrentTrack();
-      // let _current = current;
-      // ++_current;
-      // const nextTrack = await TrackPlayer.getTrack(_current);
-      // if (nextTrack) {
-      //   await TrackPlayer.skipToNext();
-      // }
+      console.log('currentTrackRef: ', currentTrackIdRef.current);
+      ++currentTrackIdRef.current;
+      isSkipToNext.current = true;
       if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
         if (currentTrackIdRef.current < tracksArr.length) {
           let _currentId = currentTrackIdRef.current;
           ++_currentId;
           let item = tracksArr.find((elem) => elem.id == _currentId);
+          console.log('item: ', item);
+          await TrackPlayer.reset();
           await setTrackToPlay(item);
           await setCurrentSongTitle();
           startAnimation();
+          //await TrackPlayer.play();
         }
+      } else {
+        isSkipToNext.current = false;
+        return;
       }
     }
 
@@ -367,11 +339,11 @@ const PlayerScreen = ({ navigation }) => {
       currentTrackIdRef.current = item.id;
       //await TrackPlayer.reset();
       const arr = [];
-      const dirs = ReactNativeBlobUtil.fs.dirs;
-      const track = {
-        id: item.id,
-        url: 'file:///'+dirs.DocumentDir+'/tracks/'+item,
-      }
+      // const dirs = ReactNativeBlobUtil.fs.dirs;
+      // const track = {
+      //   id: item.id,
+      //   url: 'file:///'+dirs.DocumentDir+'/tracks/'+item,
+      // }
       arr.push(item);
       await TrackPlayer.add(arr);
       await setCurrentSongTitle();
@@ -403,7 +375,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content"/>
-        <FlatList
+        <Animated.FlatList
           data={tracksArr}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -484,7 +456,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    zIndex: 1000
   },
   skipbackicon: {
     flexGrow: 0.1,
