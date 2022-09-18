@@ -12,6 +12,7 @@ useTrackPlayerEvents
 } from 'react-native-track-player';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {PLAYBACK_TRACK_CHANGED} from 'react-native-track-player/lib/eventTypes';
 
 
 const PlayerScreen = ({ navigation }) => {
@@ -29,6 +30,9 @@ const PlayerScreen = ({ navigation }) => {
     const [isShuffleOn, setIsShuffleOn] = useState(false);
     const currentTrackIdRef = useRef(-1);
     const songTitleRef = useRef('');
+    const nextSongTitleRef = useRef('');
+    let isPlayQueue = useRef(false);
+    let isSingleTrackPlay = useRef(false);
     let tracks = useRef([]);
     const events = [
       //Event.PlaybackState,
@@ -36,52 +40,119 @@ const PlayerScreen = ({ navigation }) => {
       Event.PlaybackTrackChanged,
       Event.PlaybackQueueEnded
     ];
-    
+
+    const fetchNextTitle = () => {
+        TrackPlayer.getCurrentTrack().then((trackNum) => {
+          TrackPlayer.getTrack(++trackNum).then((track) => {
+            //currentTrackIdRef.current = track.id;
+            nextSongTitleRef.current = track.title;
+           console.log('next title: ', nextSongTitleRef.current);
+            //console.log('songTitleafter: ', songTitleRef.current)
+            // setCurrentSongTitle().then(() => {
+            //   startAnimation();
+
+            // });
+            //console.log('currentTrackIdAfter: ', currentTrackIdRef.current)
+          })
+          
+          //console.log('current: ', track);
+        }).catch(e => {
+          console.log(e);
+        });
+    }
 
     useEffect(() => {  
-          getAllTracks().then((results) => {
-            if (results.length !== 0) {
-                tracks = results;
-                addTracksToPlayer(tracks).then((data) => {
-                  //So far do nothing here...
-                  // setPlayerTracks(data);
-                  // setQueueTracks(data);
-                })
-            }
-           }).catch((error) => {
-            console.log(error);
-           });
-          
-      }, []);
 
-      useTrackPlayerEvents(events, (event) => {
-        console.log('event: ', event);
-        if (event.type === Event.PlaybackError) {
-          console.warn('An error occured while playing the current track.');
+      if (playbackState === State.Playing || playbackState === 3 || playbackState === State.Loading) {
+        if (isPlayQueue || isSingleTrackPlay) {
+          fetchNextTitle();
+          if (nextSongTitleRef.current != '') {
+            songTitleRef.current = nextSongTitleRef.current;
+          }
         }
-          // TODO: fix this for when we hit pause it does not keep shuffle going....
-          if (event.type == Event.PlaybackTrackChanged) {
-            if (event.nextTrack != null) {
-              TrackPlayer.getTrack(event.nextTrack).then((track) => {
-                setSongTitleFromQueue(track).then(() =>{})
+        //console.log(nextSongTitleRef.current);
+
+        // console.log('playing');
+        // console.log('loading');
+        // console.log('song title: ', songTitleRef.current);
+        // console.log('currentTrackIdBefore: ', currentTrackIdRef.current)
+        // Update track title and trackIdref
+        //songTitleRef.current = '';
+        //stopAnimation();
+        //songTitleRef.current = 'hello';
+
+
+      } else if (playbackState === 'paused' || playbackState === 2) {
+        // console.log('paused');
+        // console.log('song title: ', songTitleRef.current)
+      } else if (playbackState === 'stopped') {
+          // console.log('stopped');
+          // console.log('song title: ', songTitleRef.current)
+      } else {
+        // console.log('loading');
+        // console.log('song title: ', songTitleRef.current)
+      }
+      console.log(songTitleRef.current);
+      //if (isInitialLoad.current) {
+        getAllTracks().then((results) => {
+          if (results.length !== 0) {
+              tracks = results;
+              addTracksToPlayer(tracks).then((data) => {
+                //So far do nothing here...
+                // setPlayerTracks(data);
+                // setQueueTracks(data);
               })
-            } else {
-              songTitleRef.current = '';
-              console.log('play outline being set...');
-              console.log('playbackstate: ', playbackState);
-              if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Playing) {
-                setplayPauseIcon('ios-pause-outline');
-              }
-              stopAnimation();
-          } 
-          if (event.type == Event.PlaybackQueueEnded) {
-            songTitleRef.current = '';
-            setplayPauseIcon('ios-play-outline');
-            stopAnimation();
-            TrackPlayer.reset().then(() => {});
           }
-          }
-      });
+         }).catch((error) => {
+          console.log(error);
+         });
+      //}
+          
+      }, [playbackState]);
+    
+
+      // useTrackPlayerEvents(events, (event) => {
+      //   if (isShuffleOn) {
+
+      //   } else {
+
+      //   }
+      //   console.log('event: ', event);
+      //   if (event.type === Event.PlaybackError) {
+      //     console.warn('An error occured while playing the current track.');
+      //   }
+      //     // TODO: fix this for when we hit pause it does not keep shuffle going....
+      //     if (event.type == Event.PlaybackTrackChanged && playbackState != Event.Paused) {
+      //       if (event.nextTrack != null) {
+      //         TrackPlayer.getTrack(event.nextTrack).then((track) => {
+      //           setSongTitleFromQueue(track).then(() =>{})
+      //         })
+      //       } 
+      //       else {
+      //         songTitleRef.current = '';
+      //         setplayPauseIcon('ios-play-outline');
+      //         stopAnimation();
+      //         //if (event.type == Event.PlaybackQueueEnded)
+      //         TrackPlayer.pause().then(() => {
+      //           TrackPlayer.reset().then(() => {});
+      //         });
+              
+      //         // console.log('play outline being set...');
+      //         // console.log('playbackstate: ', playbackState);
+      //         // if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Paused) {
+      //         //   //setplayPauseIcon('ios-play-outline');
+      //         // }
+      //         //stopAnimation();
+      //     } 
+        
+      //     // if (event.type == Event.PlaybackQueueEnded && playbackState == State.Playing) {
+      //     //   songTitleRef.current = '';
+      //     //   setplayPauseIcon('ios-play-outline');
+      //     //   stopAnimation();
+      //     //   TrackPlayer.reset().then(() => {});
+      //     // }
+      //   }
+      // });
 
     const setSongTitleFromQueue = async (item) => {
       if (item != null) {
@@ -132,6 +203,9 @@ const PlayerScreen = ({ navigation }) => {
       }
 
     const singleTrackPlayBack = async (playbackState, item) => {
+        isSingleTrackPlay = true;
+        isPlayQueue.current = false;
+
         setSelectedId(item.id);
         const currentTrack = await TrackPlayer.getCurrentTrack();
 
@@ -197,11 +271,12 @@ const PlayerScreen = ({ navigation }) => {
     }
     
     const playPauseQueue = async (playbackState) => {
+      isSingleTrackPlay = false;
+      isPlayQueue.current = true;
       if (playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
         await setCurrentSongTitle();
         startAnimation(); 
-        //await setCurrentSongToPlay();      
         await TrackPlayer.play();
       }
       if (playbackState == State.Playing) {
@@ -290,7 +365,7 @@ const PlayerScreen = ({ navigation }) => {
 
     const setTrackToPlay = async (item) => {
       currentTrackIdRef.current = item.id;
-      await TrackPlayer.reset();
+      //await TrackPlayer.reset();
       const arr = [];
       const dirs = ReactNativeBlobUtil.fs.dirs;
       const track = {
