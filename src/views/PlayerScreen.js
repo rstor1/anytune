@@ -268,45 +268,24 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const skipBack = async (playbackState) => {
-      // const current = await TrackPlayer.getCurrentTrack();
-      // let _current = current;
-      // --_current;
-      // const prevTrack = await TrackPlayer.getTrack(_current);
-      // if (prevTrack) {
-      //   await TrackPlayer.skipToPrevious();
-      // }
       if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
-        if ( currentTrackIdRef.current >= 2 ) {
-          let _currentId = currentTrackIdRef.current;
-          --_currentId;
-          let item = tracksArr.find((elem) => elem.id == _currentId);
-          await setTrackToPlay(item);
-          await setCurrentSongTitle();
-          startAnimation();
+        const current = await TrackPlayer.getCurrentTrack();
+        if (current === 0) {
+          return;
+        } else {
+          await TrackPlayer.skipToPrevious();
         }
+      } else {
+        return;
       }
     }
 
     const skipForward = async (playbackState) => {
-      console.log('currentTrackRef: ', currentTrackIdRef.current);
-      ++currentTrackIdRef.current;
-      isSkipToNext.current = true;
       if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
-        if (currentTrackIdRef.current < tracksArr.length) {
-          let _currentId = currentTrackIdRef.current;
-          ++_currentId;
-          let item = tracksArr.find((elem) => elem.id == _currentId);
-          console.log('item: ', item);
-          await TrackPlayer.reset();
-          await setTrackToPlay(item);
-          await setCurrentSongTitle();
-          startAnimation();
-          //await TrackPlayer.play();
-        }
+        await TrackPlayer.skipToNext();
       } else {
-        isSkipToNext.current = false;
         return;
       }
     }
