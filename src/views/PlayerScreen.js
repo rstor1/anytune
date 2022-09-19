@@ -27,7 +27,6 @@ const PlayerScreen = ({ navigation }) => {
     const [songTitle, setSongTitle] = useState('');
     const [songTitleLength, setSongTitleLength] = useState(0);
     const [shuffleText, setShuffleText] = useState('');
-    const [isShuffleOn, setIsShuffleOn] = useState(false);
     const currentTrackIdRef = useRef(-1);
     const songTitleRef = useRef('');
     const nextSongTitleRef = useRef('');
@@ -35,6 +34,7 @@ const PlayerScreen = ({ navigation }) => {
     let isSingleTrackPlay = useRef(false);
     let isSkipToNext = useRef(false);
     let tracks = useRef([]);
+    let isShuffleOn = useRef(false);
 
     const events = [
       Event.PlaybackState,
@@ -232,11 +232,6 @@ const PlayerScreen = ({ navigation }) => {
           setplayPauseIcon('ios-pause-outline');
         }
       }
-      // async tracksArr.forEach((item) => {
-      //   if (item.id == currentTrackIdRef.current) {
-      //     await setTrackToPlay(item);
-      //   }
-      // });
     }
     
     const playPauseQueue = async (playbackState) => {
@@ -291,17 +286,14 @@ const PlayerScreen = ({ navigation }) => {
     }
 
     const shuffle = async () => {
-      if (isShuffleOn) {
+      if (isShuffleOn.current) {
         setShuffleText('');
-        setIsShuffleOn(false);
+        isShuffleOn.current = false;
+        await TrackPlayer.reset();
+        stopAnimation();
+        setplayPauseIcon('ios-play-outline');
       } else {
         await startShuffle();
-        // var item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
-        // setplayPauseIcon('ios-pause-outline');
-        // await setTrackToPlay(item);
-        // setShuffleText('Shuffle On');
-        // startAnimation();
-        // setIsShuffleOn(true);
       }
     }
 
@@ -311,18 +303,12 @@ const PlayerScreen = ({ navigation }) => {
       await setTrackToPlay(item);
       setShuffleText('Shuffle On');
       startAnimation();
-      setIsShuffleOn(true);
+      isShuffleOn.current = true;
     }
 
     const setTrackToPlay = async (item) => {
       currentTrackIdRef.current = item.id;
-      //await TrackPlayer.reset();
       const arr = [];
-      // const dirs = ReactNativeBlobUtil.fs.dirs;
-      // const track = {
-      //   id: item.id,
-      //   url: 'file:///'+dirs.DocumentDir+'/tracks/'+item,
-      // }
       arr.push(item);
       await TrackPlayer.add(arr);
       await setCurrentSongTitle();
@@ -354,7 +340,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content"/>
-        <Animated.FlatList
+        <FlatList
           data={tracksArr}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -395,13 +381,13 @@ const PlayerScreen = ({ navigation }) => {
 {/* TODO: make element variable for shuffle icon */}
           <Text numberOfLines={1} style={styles.shuffletext}>
             Shuffle{' '}
-            {isShuffleOn && <Icon 
+            {isShuffleOn.current && <Icon 
             style={styles.shuffleradio}
             name={'ios-radio-button-on-outline'}
             color={'#39f705'}
             size={15}
           />}
-            {!isShuffleOn && <Icon 
+            {!isShuffleOn.current && <Icon 
             style={styles.shuffleradio}
             name={'ios-radio-button-off-outline'}
             color={'#97abb5'}
