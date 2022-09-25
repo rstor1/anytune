@@ -22,6 +22,7 @@ export const downloadFile = (data) =>  {
     .then((res) => {
         resolve(res.respInfo.status);
     }).catch((e) => {
+      // TODO: Handle this in UI
         console.log('fetch error: ', e);
         reject(e);
       });

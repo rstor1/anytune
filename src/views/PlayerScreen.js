@@ -12,8 +12,7 @@ useTrackPlayerEvents
 } from 'react-native-track-player';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {PLAYBACK_TRACK_CHANGED} from 'react-native-track-player/lib/eventTypes';
-
+import Sound from 'react-native-sound';
 
 const PlayerScreen = ({ navigation }) => {
     const screen = Dimensions.get('screen');
@@ -35,6 +34,7 @@ const PlayerScreen = ({ navigation }) => {
     let isSkipToNext = useRef(false);
     let tracks = useRef([]);
     let isShuffleOn = useRef(false);
+    let itemToPlay = useRef({});
 
     const events = [
       Event.PlaybackState,
@@ -43,20 +43,8 @@ const PlayerScreen = ({ navigation }) => {
       // Event.PlaybackQueueEnded
     ];
 
-    useEffect(() => {  
+    useEffect(() => {
       (async () => {
-        if (playbackState === State.Playing)  {
-          stopAnimation();
-          const current = await TrackPlayer.getCurrentTrack();
-          const track = await TrackPlayer.getTrack(current);
-          songTitleRef.current = track.title;
-          startAnimation();
-        }
-        if (playbackState === State.Paused) {
-          stopAnimation();
-          await TrackPlayer.pause();
-        }
-
         getAllTracks().then((results) => {
           if (results.length !== 0) {
               tracks = results;
@@ -66,11 +54,45 @@ const PlayerScreen = ({ navigation }) => {
           console.log(error);
          });
       })();
+    },[]);
+
+
+    // useEffect(() => {  
+    //   (async () => {
+    //     console.log('state: ', playbackState);
+    //     if (playbackState === State.Stopped)  {
+          
+    //       if (Object.keys(itemToPlay.current).length != 0) {
+    //         // continue playback by adding tracksArr starting after itemToPlay.current next id
+    //         // check if id exists in tracksArr, if yes then play it, if not start from beginning of tracksArra(id = 1)
+    //         let foundId = tracksArr.filter(x => tracksArr.indexOf(itemToPlay.current.id) !== -1);
+    //         //await setTrackToPlay(tracksArr[itemToPlay.current.id+1]);
+    //         //itemToPlay.current = {};
+    //       } else {
+    //         //stopAnimation();
+    //         const current = await TrackPlayer.getCurrentTrack();
+    //         const track = await TrackPlayer.getTrack(current);
+    //         songTitleRef.current = track.title;
+    //         //startAnimation();
+    //       }
+
+    //     }
+    //     if (playbackState === State.Paused) {
+    //       //stopAnimation();
+    //       //await TrackPlayer.pause();
+    //     }
+    //     if (playbackState == State.Playing) {
+
+    //     }
+
+
+    //   })();
     
-      return () => {
-        // this now gets called when the component unmounts
-      };     
-      },[playbackState]);
+    //   // return () => {
+    //   //   // this now gets called when the component unmounts
+    //   // };     
+    //   },[playbackState]);
+
     
 
       // useTrackPlayerEvents(events, (event) => {
@@ -127,7 +149,7 @@ const PlayerScreen = ({ navigation }) => {
       if (item != null) {
         songTitleRef.current = item.title;
         animation.setValue(screen.width*-1);
-        startAnimation();
+        //startAnimation();
       }
     }
 
@@ -166,55 +188,10 @@ const PlayerScreen = ({ navigation }) => {
         arr.push(track);
         });
         setTracksArr(arr);
-        setPlayerTracks(arr);
-        await TrackPlayer.add(arr);
+        //setPlayerTracks(arr);
+        //await TrackPlayer.add(arr);
       }
 
-    const singleTrackPlayBack = async (playbackState, item) => {
-        isSingleTrackPlay = true;
-        isPlayQueue.current = false;
-        isSkipToNext.current = false;
-
-        setSelectedId(item.id);
-        const currentTrack = await TrackPlayer.getCurrentTrack();
-
-        if (playbackState == State.Paused) {
-          if (currentTrackIdRef.current != item.id) {
-            await setTrackToPlay(item);
-            startAnimation();
-            setplayPauseIcon('ios-pause-outline');
-          } else {
-            await setTrackToPlay(item);
-            startAnimation();
-            setplayPauseIcon('ios-pause-outline');
-            //await TrackPlayer.play();
-          }
-        }
-        if (playbackState == State.None && currentTrack == null && item != null && currentTrack != item.id) {
-          await setCurrentSongTitle();
-          startAnimation();
-          await setTrackToPlay(item);
-          setplayPauseIcon('ios-pause-outline');
-        }
-        if (playbackState == State.Playing && currentTrack != null && item != null && currentTrackIdRef.current != item.id) {
-          startAnimation();
-          await setCurrentSongTitle();
-          await setTrackToPlay(item);
-          setplayPauseIcon('ios-pause-outline');
-        } 
-        if (playbackState == State.Playing && currentTrack != null && item != null && currentTrackIdRef.current == item.id) {
-          //setSongTitle('');
-          stopAnimation();
-          await TrackPlayer.pause();
-          setplayPauseIcon('ios-play-outline');
-        } 
-        if (playbackState == State.Ready && currentTrack != null && item != null) {
-          await setCurrentSongTitle();       
-          await setTrackToPlay(item);
-          setplayPauseIcon('ios-pause-outline');
-          startAnimation();
-        }
-      }
 
     const setCurrentSongTitle = async () => {  
       tracksArr.forEach((item) => {
@@ -241,14 +218,14 @@ const PlayerScreen = ({ navigation }) => {
       if (playbackState == State.Paused) {
         setplayPauseIcon('ios-pause-outline');
         //await setCurrentSongTitle();
-        startAnimation(); 
+        //startAnimation(); 
         await TrackPlayer.play();
       }
       if (playbackState == State.Playing) {
         setplayPauseIcon('ios-play-outline');
         await TrackPlayer.pause();
         setSongTitle('');
-        stopAnimation();
+        //stopAnimation();
         setShuffleText('');
       }
       if (playbackState == State.Ready) {
@@ -256,41 +233,19 @@ const PlayerScreen = ({ navigation }) => {
           currentTrackIdRef.current = 1;
         }
         await setCurrentSongTitle();
-        startAnimation();
+        //startAnimation();
         setplayPauseIcon('ios-pause-outline');
         await TrackPlayer.play();
       }
     }
 
-    const skipBack = async (playbackState) => {
-      if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
-        setplayPauseIcon('ios-pause-outline');
-        const current = await TrackPlayer.getCurrentTrack();
-        if (current === 0) {
-          return;
-        } else {
-          await TrackPlayer.skipToPrevious();
-        }
-      } else {
-        return;
-      }
-    }
-
-    const skipForward = async (playbackState) => {
-      if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
-        setplayPauseIcon('ios-pause-outline');
-        await TrackPlayer.skipToNext();
-      } else {
-        return;
-      }
-    }
 
     const shuffle = async () => {
       if (isShuffleOn.current) {
         setShuffleText('');
         isShuffleOn.current = false;
         await TrackPlayer.reset();
-        stopAnimation();
+        //stopAnimation();
         setplayPauseIcon('ios-play-outline');
       } else {
         await startShuffle();
@@ -302,18 +257,89 @@ const PlayerScreen = ({ navigation }) => {
       setplayPauseIcon('ios-pause-outline');
       await setTrackToPlay(item);
       setShuffleText('Shuffle On');
-      startAnimation();
+      //startAnimation();
       isShuffleOn.current = true;
     }
 
     const setTrackToPlay = async (item) => {
+      await TrackPlayer.reset();
       currentTrackIdRef.current = item.id;
       const arr = [];
       arr.push(item);
       await TrackPlayer.add(arr);
       await setCurrentSongTitle();
       await TrackPlayer.play();
+      await TrackPlayer.stop();
+      //startAnimation();
     }
+
+    const singleTrackPlayBack = async (playbackState, item) => {
+      try {
+        //console.log(item.url);
+        //10 second short music.mp3
+        Sound.setCategory('Playback', true);
+        // play the file tone.mp3
+        //SoundPlayer.playSoundFile('tone', 'mp3');
+        // or play from url
+        var myRemoteSound = new Sound(item.url,null,(error)=>{
+          if(error){
+          console.log(error);
+          return;
+          }else{
+          myRemoteSound.play((success)=>{
+          if(success){
+          console.log('Sound playing')
+          }else{
+          console.log('Issue playing file');
+          }
+          })
+          }
+          });
+          myRemoteSound.setVolume(0.9);
+          myRemoteSound.release();
+    } catch (e) {
+        console.log(`cannot play the sound file`, e);
+    }
+      //await TrackPlayer.reset();
+      //console.log('state: ', playbackState);
+      // if (itemToPlay.current == item) {
+      //   //await TrackPlayer.pause();
+      //   setplayPauseIcon('ios-play-outline');
+      // } else {
+      //   itemToPlay.current = item;
+      //   //await setTrackToPlay(itemToPlay.current);
+      //   setplayPauseIcon('ios-pause-outline');
+      // }
+        setSelectedId(item.id);
+
+      }
+  
+      const skipForward = async (playbackState) => {
+        console.log(selectedId);
+        const q = await TrackPlayer.getQueue();
+        //await TrackPlayer.reset();
+        //const _q = await TrackPlayer.getQueue();
+        if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
+          setplayPauseIcon('ios-pause-outline');
+          await TrackPlayer.skipToNext();
+        } else {
+          return;
+        }
+      }
+
+      const skipBack = async (playbackState) => {
+        if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
+          setplayPauseIcon('ios-pause-outline');
+          const current = await TrackPlayer.getCurrentTrack();
+          if (current === 0) {
+            return;
+          } else {
+            await TrackPlayer.skipToPrevious();
+          }
+        } else {
+          return;
+        }
+      }
 
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
           <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
@@ -323,7 +349,7 @@ const PlayerScreen = ({ navigation }) => {
 
 
     const renderItem = ({ item }) => {
-      const backgroundColor = item.id === selectedId ? '#97abb5' : 'black';
+      const backgroundColor = item.id === selectedId ? '#97abb5' : '#22353d';
       const color = item.id === selectedId ? 'black' : 'white';
   
 
@@ -338,7 +364,8 @@ const PlayerScreen = ({ navigation }) => {
   };
 
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+      <SafeAreaView>
         <StatusBar barStyle="light-content"/>
         <FlatList
           data={tracksArr}
@@ -346,10 +373,12 @@ const PlayerScreen = ({ navigation }) => {
           keyExtractor={(item) => item.id}
           extraData={selectedId}
         />
-        <View style={styles.titlemarquee}>
+        {/* Footer */}
+      <View style={styles.footer}>
+      <View style={styles.titlemarquee}>
         <Animated.Text numberOfLines={1} style={[styles.animatedtitle, {transform: [{ translateX: animation }]}]}>{songTitleRef.current}</Animated.Text>
         </View>
-        <View style={styles.footer}>
+
         <Icon 
             style={styles.skipbackicon}
             name={'ios-play-skip-back-outline'}
@@ -378,7 +407,6 @@ const PlayerScreen = ({ navigation }) => {
             onPress={() => shuffle()}
             size={40}
           />
-{/* TODO: make element variable for shuffle icon */}
           <Text numberOfLines={1} style={styles.shuffletext}>
             Shuffle{' '}
             {isShuffleOn.current && <Icon 
@@ -393,9 +421,10 @@ const PlayerScreen = ({ navigation }) => {
             color={'#97abb5'}
             size={15}
           />}
-            </Text>
-        </View>
+          </Text>
+      </View>
       </SafeAreaView>
+      </View>
     );
 };
 
@@ -417,12 +446,13 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    flex: 0.15,
     backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
-    flexWrap: 'wrap',
-    zIndex: 1000
+    width: '100%',
+    height: 130,
+    position: 'absolute',
+    bottom: 0,
   },
   skipbackicon: {
     flexGrow: 0.1,
@@ -445,7 +475,6 @@ const styles = StyleSheet.create({
     flexBasis: 0,
     color: '#97abb5',
     fontSize: 12,
-    
   },
   button: {
     backgroundColor: 'black',
@@ -456,10 +485,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   titlemarquee: {
-    flexDirection: 'row',
     justifyContent: 'center',
-    flex: 0.036,
     backgroundColor: 'black',
+    position: 'absolute',
+    top: 10
   },
   shuffleradio: {
   }
