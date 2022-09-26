@@ -40,13 +40,6 @@ const PlayerScreen = ({ navigation }) => {
     let isPlay = useRef(false);
     let isPause = useRef(false);
 
-    const events = [
-      Event.PlaybackState,
-      Event.PlaybackError,
-      // Event.PlaybackTrackChanged,
-      // Event.PlaybackQueueEnded
-    ];
-
     useEffect(() => {
       (async () => {
         getAllTracks().then((results) => {
@@ -60,94 +53,7 @@ const PlayerScreen = ({ navigation }) => {
       })();
     },[]);
 
-
-    // useEffect(() => {  
-    //   (async () => {
-    //     console.log('state: ', playbackState);
-    //     if (playbackState === State.Stopped)  {
-          
-    //       if (Object.keys(itemToPlay.current).length != 0) {
-    //         // continue playback by adding tracksArr starting after itemToPlay.current next id
-    //         // check if id exists in tracksArr, if yes then play it, if not start from beginning of tracksArra(id = 1)
-    //         let foundId = tracksArr.filter(x => tracksArr.indexOf(itemToPlay.current.id) !== -1);
-    //         //await setTrackToPlay(tracksArr[itemToPlay.current.id+1]);
-    //         //itemToPlay.current = {};
-    //       } else {
-    //         //stopAnimation();
-    //         const current = await TrackPlayer.getCurrentTrack();
-    //         const track = await TrackPlayer.getTrack(current);
-    //         songTitleRef.current = track.title;
-    //         //startAnimation();
-    //       }
-
-    //     }
-    //     if (playbackState === State.Paused) {
-    //       //stopAnimation();
-    //       //await TrackPlayer.pause();
-    //     }
-    //     if (playbackState == State.Playing) {
-
-    //     }
-
-
-    //   })();
-    
-    //   // return () => {
-    //   //   // this now gets called when the component unmounts
-    //   // };     
-    //   },[playbackState]);
-
-    
-
-      // useTrackPlayerEvents(events, (event) => {
-      //   if (isShuffleOn) {
-
-      //   } else {
-
-      //   }
-      //   console.log('event: ', event);
-      //   if (event.type === Event.PlaybackError) {
-      //     console.warn('An error occured while playing the current track.');
-      //   }
-      //   if (event.state === State.Playing) {
-      //       fetchTitle();
-      //   }
-      //   if (event.state === State.Paused) {
-      //     stopAnimation();
-      //     setplayPauseIcon('ios-pause-outline');
-      //   }
-      //     // TODO: fix this for when we hit pause it does not keep shuffle going....
-      //   //   if (event.type == Event.PlaybackTrackChanged && playbackState != Event.Paused) {
-      //   //     if (event.nextTrack != null) {
-      //   //       TrackPlayer.getTrack(event.nextTrack).then((track) => {
-      //   //         setSongTitleFromQueue(track).then(() =>{})
-      //   //       })
-      //   //     } 
-      //   //     else {
-      //   //       songTitleRef.current = '';
-      //   //       setplayPauseIcon('ios-play-outline');
-      //   //       stopAnimation();
-      //   //       //if (event.type == Event.PlaybackQueueEnded)
-      //   //       TrackPlayer.pause().then(() => {
-      //   //         TrackPlayer.reset().then(() => {});
-      //   //       });
-              
-      //   //       // console.log('play outline being set...');
-      //   //       // console.log('playbackstate: ', playbackState);
-      //   //       // if (playbackState == State.Ready || playbackState == State.None || playbackState == State.Paused) {
-      //   //       //   //setplayPauseIcon('ios-play-outline');
-      //   //       // }
-      //   //       //stopAnimation();
-      //   //   } 
-        
-      //   //   // if (event.type == Event.PlaybackQueueEnded && playbackState == State.Playing) {
-      //   //   //   songTitleRef.current = '';
-      //   //   //   setplayPauseIcon('ios-play-outline');
-      //   //   //   stopAnimation();
-      //   //   //   TrackPlayer.reset().then(() => {});
-      //   //   // }
-      //   // }
-      // });
+  
 
     const setSongTitleFromQueue = async (item) => {
       if (item != null) {
@@ -187,7 +93,8 @@ const PlayerScreen = ({ navigation }) => {
           const track = {
             id: index+1,
             url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
-            title: item.replace(/\.[^/.]+$/, "")
+            title: item.replace(/\.[^/.]+$/, ""),
+            isPlaying: false
         };
         arr.push(track);
         });
@@ -195,53 +102,7 @@ const PlayerScreen = ({ navigation }) => {
         //setPlayerTracks(arr);
         //await TrackPlayer.add(arr);
       }
-
-
-    const setCurrentSongTitle = async () => {  
-      tracksArr.forEach((item) => {
-        if (item.id == currentTrackIdRef.current) {
-          songTitleRef.current = item.title;
-          animation.setValue(screen.width*-1);
-        }
-      });
-    }
-
-    const setCurrentSongToPlay = async () => {
-      for (const item of tracksArr) {
-        if (item.id == currentTrackIdRef.current) {
-          await setTrackToPlay(item);
-          setplayPauseIcon('ios-pause-outline');
-        }
-      }
-    }
-    
-    const playPauseQueue = async (playbackState) => {
-      isSingleTrackPlay = false;
-      isPlayQueue.current = true;
-      isSkipToNext.current = false;
-      if (playbackState == State.Paused) {
-        setplayPauseIcon('ios-pause-outline');
-        //await setCurrentSongTitle();
-        //startAnimation(); 
-        await TrackPlayer.play();
-      }
-      if (playbackState == State.Playing) {
-        setplayPauseIcon('ios-play-outline');
-        await TrackPlayer.pause();
-        setSongTitle('');
-        //stopAnimation();
-        setShuffleText('');
-      }
-      if (playbackState == State.Ready) {
-        if (currentTrackIdRef.current == -1) {
-          currentTrackIdRef.current = 1;
-        }
-        await setCurrentSongTitle();
-        //startAnimation();
-        setplayPauseIcon('ios-pause-outline');
-        await TrackPlayer.play();
-      }
-    }
+  
 
 
     const shuffle = async () => {
@@ -265,25 +126,23 @@ const PlayerScreen = ({ navigation }) => {
       isShuffleOn.current = true;
     }
 
-    const setTrackToPlay = async (item) => {
-      await TrackPlayer.reset();
-      currentTrackIdRef.current = item.id;
-      const arr = [];
-      arr.push(item);
-      await TrackPlayer.add(arr);
-      await setCurrentSongTitle();
-      await TrackPlayer.play();
-      await TrackPlayer.stop();
-      //startAnimation();
-    }
-
-    const trackPlayer = async (isPlayToggle) => {
+    const trackPlayer = async () => {
       Sound.setCategory('Playback', true);
-      isPlay.current = isPlayToggle ? false : true;
+      if (playPauseIcon == 'ios-play-outline') {
+        isPlay.current = true;
+      } else {
+        isPlay.current = false;
+      } 
       if (isPlay.current) {
         if (Object.keys(currentTrack.current).length !== 0) {
           setplayPauseIcon('ios-pause-outline');
-          currentTrack.current.play();
+          currentTrack.current.play((success) => {
+            if (success) {
+              currentTrack.current = {};
+              setplayPauseIcon('ios-play-outline');
+              trackPlayer();
+            }
+          });
         } else {
           currentTrackIndex.current++;
           currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
@@ -299,46 +158,77 @@ const PlayerScreen = ({ navigation }) => {
                     // Play next track if exists in tracksArr
                     let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
                     if (hasNext) {
-                      trackPlayer(false);
+                      trackPlayer();
                     } else {
                       setplayPauseIcon('ios-play-outline');
                       isPlay.current = false;
                       currentTrack.current.stop();
                       currentTrack.current = {};
                       currentTrackIndex.current = -1;
-                      //currentTrack.current.release();
                     }
                   }else{
                     console.log('Issue playing file');
                   }
-                })  
+                });  
             }  
-          })
+          });
         }
-
       } else {
         currentTrack.current.pause();
         setplayPauseIcon('ios-play-outline');
       }
-
     }
 
-    const trackPlayBack = async (item, isPlayToggle) => {
-
-
+    const singleTrackPlayBack = async (item) => {
+      item.isPlaying = item.isPlaying ? false : true;
+      // If there is a current track, stop it, empty it to set it to item.
+      if (Object.keys(currentTrack.current).length !== 0) {
+        currentTrack.current.stop();
+        currentTrack.current = {};
       }
+        currentTrack.current = new Sound(item.url,null,(error)=> {
+          if (error) {
+            console.log(error);
+            return;
+          } else {
+            setplayPauseIcon('ios-pause-outline');
+            setSelectedId(item.id);
+            currentTrack.current.play((success)=>{
+              if(success){  
+                currentTrack.current = {};
+                let hasNext = tracksArr.find(x => x.id == item.id+1);
+                if (hasNext) {
+                  //Play next item
+                  singleTrackPlayBack(tracksArr[item.id]);
+                } else {
+                  setplayPauseIcon('ios-play-outline');
+                  isPlay.current = false;
+                  currentTrack.current.stop();
+                  currentTrack.current = {};
+                  currentTrackIndex.current = -1;
+                  //currentTrack.current.release();
+                }
+          }else{
+            console.log('Issue playing file');
+          }
+        });
+      }
+    });
+  }
   
-      const skipForward = async (playbackState) => {
-        console.log(selectedId);
-        const q = await TrackPlayer.getQueue();
-        //await TrackPlayer.reset();
-        //const _q = await TrackPlayer.getQueue();
-        if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
-          setplayPauseIcon('ios-pause-outline');
-          await TrackPlayer.skipToNext();
-        } else {
-          return;
-        }
+      const skipForward = async () => {
+        //console.log(selectedId);
+        //console.log(currentTrack.current);
+        console.log('trackArr index: ', currentTrackIndex.current);
+        // Take currentTrackIndex.current plus one to play next. Don't forget to set the index ahead too.
+        // Also setSelectedId to the next item.id to highlight the track.
+
+        
+        // if () {
+        //   setplayPauseIcon('ios-pause-outline');
+        // } else {
+        //   return;
+        // }
       }
 
       const skipBack = async (playbackState) => {
@@ -370,7 +260,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <Item
         item={item}
-        onPress={() => trackPlayBack(item,isPlay.current)}
+        onPress={() => singleTrackPlayBack(item)}
         backgroundColor={{ backgroundColor }}
         textColor={{ color }}
       />
@@ -404,14 +294,14 @@ const PlayerScreen = ({ navigation }) => {
             style={styles.playicon}
             name={playPauseIcon}
             color="white" 
-            onPress={() => trackPlayer(isPlay.current)}
+            onPress={() => trackPlayer()}
             size={40}
           />
           <Icon 
             style={styles.skipforwardicon}
             name={'ios-play-skip-forward-outline'}
             color="white" 
-            onPress={() => skipForward(playbackState)}
+            onPress={() => skipForward()}
             size={40}
           />
           <Icon 
