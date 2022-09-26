@@ -35,6 +35,10 @@ const PlayerScreen = ({ navigation }) => {
     let tracks = useRef([]);
     let isShuffleOn = useRef(false);
     let itemToPlay = useRef({});
+    let currentTrack = useRef({});
+    let currentTrackIndex = useRef(-1);
+    let isPlay = useRef(false);
+    let isPause = useRef(false);
 
     const events = [
       Event.PlaybackState,
@@ -273,44 +277,54 @@ const PlayerScreen = ({ navigation }) => {
       //startAnimation();
     }
 
-    const singleTrackPlayBack = async (playbackState, item) => {
-      try {
-        //console.log(item.url);
-        //10 second short music.mp3
-        Sound.setCategory('Playback', true);
-        // play the file tone.mp3
-        //SoundPlayer.playSoundFile('tone', 'mp3');
-        // or play from url
-        var myRemoteSound = new Sound(item.url,null,(error)=>{
-          if(error){
-          console.log(error);
-          return;
-          }else{
-          myRemoteSound.play((success)=>{
-          if(success){
-          console.log('Sound playing')
-          }else{
-          console.log('Issue playing file');
-          }
+    const trackPlayer = async (isPlayToggle) => {
+      Sound.setCategory('Playback', true);
+      isPlay.current = isPlayToggle ? false : true;
+      if (isPlay.current) {
+        if (Object.keys(currentTrack.current).length !== 0) {
+          setplayPauseIcon('ios-pause-outline');
+          currentTrack.current.play();
+        } else {
+          currentTrackIndex.current++;
+          currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
+            if (error) {
+              console.log(error);
+              return;
+            } else {
+                setplayPauseIcon('ios-pause-outline');
+                setSelectedId(tracksArr[currentTrackIndex.current].id);
+                currentTrack.current.play((success)=>{
+                  if(success){  
+                    currentTrack.current = {};
+                    // Play next track if exists in tracksArr
+                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                    if (hasNext) {
+                      trackPlayer(false);
+                    } else {
+                      setplayPauseIcon('ios-play-outline');
+                      isPlay.current = false;
+                      currentTrack.current.stop();
+                      currentTrack.current = {};
+                      currentTrackIndex.current = -1;
+                      //currentTrack.current.release();
+                    }
+                  }else{
+                    console.log('Issue playing file');
+                  }
+                })  
+            }  
           })
-          }
-          });
-          myRemoteSound.setVolume(0.9);
-          myRemoteSound.release();
-    } catch (e) {
-        console.log(`cannot play the sound file`, e);
+        }
+
+      } else {
+        currentTrack.current.pause();
+        setplayPauseIcon('ios-play-outline');
+      }
+
     }
-      //await TrackPlayer.reset();
-      //console.log('state: ', playbackState);
-      // if (itemToPlay.current == item) {
-      //   //await TrackPlayer.pause();
-      //   setplayPauseIcon('ios-play-outline');
-      // } else {
-      //   itemToPlay.current = item;
-      //   //await setTrackToPlay(itemToPlay.current);
-      //   setplayPauseIcon('ios-pause-outline');
-      // }
-        setSelectedId(item.id);
+
+    const trackPlayBack = async (item, isPlayToggle) => {
+
 
       }
   
@@ -356,7 +370,7 @@ const PlayerScreen = ({ navigation }) => {
     return (
       <Item
         item={item}
-        onPress={() => singleTrackPlayBack(playbackState, item)}
+        onPress={() => trackPlayBack(item,isPlay.current)}
         backgroundColor={{ backgroundColor }}
         textColor={{ color }}
       />
@@ -390,7 +404,7 @@ const PlayerScreen = ({ navigation }) => {
             style={styles.playicon}
             name={playPauseIcon}
             color="white" 
-            onPress={() => playPauseQueue(playbackState)}
+            onPress={() => trackPlayer(isPlay.current)}
             size={40}
           />
           <Icon 
