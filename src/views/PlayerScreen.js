@@ -99,11 +99,8 @@ const PlayerScreen = ({ navigation }) => {
         arr.push(track);
         });
         setTracksArr(arr);
-        //setPlayerTracks(arr);
-        //await TrackPlayer.add(arr);
       }
   
-
 
     const shuffle = async () => {
       if (isShuffleOn.current) {
@@ -181,8 +178,6 @@ const PlayerScreen = ({ navigation }) => {
 
     const singleTrackPlayBack = async (item) => {
       currentTrackIndex.current = item.id-1;
-      //console.log(currentTrackIndex.current);
-
       item.isPlaying = item.isPlaying ? false : true;
       // If there is a current track, stop it, empty it to set it to item.
       if (Object.keys(currentTrack.current).length !== 0) {
@@ -221,63 +216,101 @@ const PlayerScreen = ({ navigation }) => {
   }
   
       const skipForward = async () => {
-        currentTrackIndex.current++;
-        currentTrack.current.stop();
-        // Take currentTrackIndex.current plus one to play next. Don't forget to set the index ahead too.
-        // Also setSelectedId to the next item.id to highlight the track.
-        // First check to see if hasNext
-        let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
-        if (hasNext) {
-          currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
-            if (error) {
-              console.log(error);
-              return;
-            } else {
-              setplayPauseIcon('ios-pause-outline');
-              setSelectedId(tracksArr[currentTrackIndex.current].id);
-              currentTrack.current.play((success)=>{
-                if(success){  
-                  currentTrack.current = {};
-                  let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
-                  if (hasNext) {
-                    //Play next item
-                    singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
-                  } else {
-                    setplayPauseIcon('ios-play-outline');
-                    isPlay.current = false;
-                    currentTrack.current.stop();
-                    currentTrack.current = {};
-                    currentTrackIndex.current = -1;
-                    //currentTrack.current.release();
-                }
-                }else{
-                  console.log('Issue playing file');
-                }
-            });
-            }
-          });
+        if (currentTrackIndex.current >= tracksArr.length - 1) {
+          return;
         } else {
-          setplayPauseIcon('ios-play-outline');
-          isPlay.current = false;
-          currentTrack.current.stop();
-          currentTrack.current = {};
-          currentTrackIndex.current = -1;
-      }
+          currentTrackIndex.current++;
+          // Take currentTrackIndex.current plus one to play next. Don't forget to set the index ahead too.
+          // Also setSelectedId to the next item.id to highlight the track.
+          // First check to see if hasNext
+          let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
+          if (hasNext) {
+            currentTrack.current.stop();
+            currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
+              if (error) {
+                console.log(error);
+                return;
+              } else {
+                setplayPauseIcon('ios-pause-outline');
+                setSelectedId(tracksArr[currentTrackIndex.current].id);
+                currentTrack.current.play((success)=>{
+                  if(success){  
+                    currentTrack.current = {};
+                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                    if (hasNext) {
+                      //Play next item
+                      singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
+                    } else {
+                      setplayPauseIcon('ios-play-outline');
+                      isPlay.current = false;
+                      currentTrack.current.stop();
+                      currentTrack.current = {};
+                      currentTrackIndex.current = -1;
+                      //currentTrack.current.release();
+                  }
+                  }else{
+                    console.log('Issue playing file');
+                  }
+              });
+              }
+            });
+          } else {
+            setplayPauseIcon('ios-play-outline');
+            isPlay.current = false;
+            currentTrack.current.stop();
+            currentTrack.current = {};
+            currentTrackIndex.current = -1;
+        }
+        }
+
     }
   
 
-      const skipBack = async (playbackState) => {
-        if (playbackState == State.Playing || playbackState == State.Connecting || playbackState == State.Paused) {
-          setplayPauseIcon('ios-pause-outline');
-          const current = await TrackPlayer.getCurrentTrack();
-          if (current === 0) {
-            return;
-          } else {
-            await TrackPlayer.skipToPrevious();
-          }
-        } else {
+      const skipBack = async () => {
+        if (currentTrackIndex.current <= -1) {
           return;
+        } else {
+          currentTrackIndex.current--;
+          let hasPrevious = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id);
+          if (hasPrevious) {
+            currentTrack.current.stop();
+            currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
+              if (error) {
+                console.log(error);
+                return;
+              } else {
+                setplayPauseIcon('ios-pause-outline');
+                setSelectedId(tracksArr[currentTrackIndex.current].id);
+                currentTrack.current.play((success)=>{
+                  if(success){  
+                    currentTrack.current = {};
+                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                    if (hasNext) {
+                      //Play next item
+                      singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
+                    } else {
+                      setplayPauseIcon('ios-play-outline');
+                      isPlay.current = false;
+                      currentTrack.current.stop();
+                      currentTrack.current = {};
+                      currentTrackIndex.current = -1;
+                      //currentTrack.current.release();
+                  }
+                  }else{
+                    console.log('Issue playing file');
+                  }
+              });
+              }
+            });
+          } else {
+            setplayPauseIcon('ios-play-outline');
+            isPlay.current = false;
+            currentTrack.current.stop();
+            currentTrack.current = {};
+            currentTrackIndex.current = -1;
         }
+        }
+
       }
 
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
@@ -322,7 +355,7 @@ const PlayerScreen = ({ navigation }) => {
             style={styles.skipbackicon}
             name={'ios-play-skip-back-outline'}
             color="white" 
-            onPress={() => skipBack(playbackState)}
+            onPress={() => skipBack()}
             size={40}
           />
           <Icon 
