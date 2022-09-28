@@ -8,27 +8,15 @@ import Sound from 'react-native-sound';
 const PlayerScreen = ({ navigation }) => {
     const screen = Dimensions.get('screen');
     const [selectedId, setSelectedId] = useState(null);
-    const [playerTracks, setPlayerTracks] = useState([]);
     const [tracksArr, setTracksArr] = useState([]);
-    const [queueTracks, setQueueTracks] = useState([]);
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
-    const [songTitle, setSongTitle] = useState('');
-    const [songTitleLength, setSongTitleLength] = useState(0);
-    const [shuffleText, setShuffleText] = useState('');
-    const currentTrackIdRef = useRef(-1);
     const songTitleRef = useRef('');
-    const nextSongTitleRef = useRef('');
-    let isPlayQueue = useRef(false);
-    let isSingleTrackPlay = useRef(false);
-    let isSkipToNext = useRef(false);
     let tracks = useRef([]);
     let isShuffleOn = useRef(false);
-    let itemToPlay = useRef({});
     let currentTrack = useRef({});
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
-    let isPause = useRef(false);
 
     useEffect(() => {
       (async () => {
@@ -57,7 +45,6 @@ const PlayerScreen = ({ navigation }) => {
       })();
     },[]);
 
-  
 
     const setSongTitleFromQueue = async (item) => {
       if (item != null) {
@@ -140,6 +127,7 @@ const PlayerScreen = ({ navigation }) => {
         currentTrack.current.stop();
         currentTrack.current = {};
         currentTrackIndex.current = -1;
+        stopAnimation();
       }
 
   }
@@ -168,7 +156,6 @@ const PlayerScreen = ({ navigation }) => {
           currentTrackIndex.current++;
           setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
           currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
-            console.log('songtitle ref before set: ', songTitleRef.current);
             if (error) {
               console.log(error);
               currentTrackIndex.current = -1;
@@ -176,7 +163,6 @@ const PlayerScreen = ({ navigation }) => {
             } else {
                 setplayPauseIcon('ios-pause-outline');
                 setSelectedId(tracksArr[currentTrackIndex.current].id);
-
                 currentTrack.current.play((success)=>{
                   if(success){  
                     currentTrack.current = {};
