@@ -111,22 +111,26 @@ const PlayerScreen = ({ navigation }) => {
       if (isShuffleOn.current) {
         currentTrack.current = {};
         let item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+        setSongTitleFromQueue(item);
         currentTrack.current = new Sound(item.url,null,(error)=> {
           if (error) {
             console.log(error);
             currentTrackIndex.current = -1;
+            stopAnimation();
             return;
           } else {
             setplayPauseIcon('ios-pause-outline');
             setSelectedId(item.id);
             currentTrack.current.play((success)=>{
               if(success){  
+                stopAnimation();
                 shuffle();              
               }else{
                 console.log('Issue playing file');
                 setplayPauseIcon('ios-play-outline');
                 currentTrack.current = {};
                 currentTrackIndex.current = -1;
+                stopAnimation();
               }
             }); 
           }
@@ -212,11 +216,14 @@ const PlayerScreen = ({ navigation }) => {
       if (Object.keys(currentTrack.current).length !== 0) {
         currentTrack.current.stop();
         currentTrack.current = {};
+        stopAnimation();
       }
+        setSongTitleFromQueue(item);
         currentTrack.current = new Sound(item.url,null,(error)=> {
           if (error) {
             console.log(error);
             currentTrackIndex.current = -1;
+            stopAnimation();
             return;
           } else {
             setplayPauseIcon('ios-pause-outline');
@@ -224,6 +231,7 @@ const PlayerScreen = ({ navigation }) => {
             currentTrack.current.play((success)=>{
               if(success){  
                 currentTrack.current = {};
+                stopAnimation();
                 let hasNext = tracksArr.find(x => x.id == item.id+1);
                 if (hasNext) {
                   //Play next item
@@ -234,10 +242,11 @@ const PlayerScreen = ({ navigation }) => {
                   currentTrack.current.stop();
                   currentTrack.current = {};
                   currentTrackIndex.current = -1;
-                  //currentTrack.current.release();
+                  stopAnimation();
                 }
           }else{
             console.log('Issue playing file');
+            stopAnimation();
           }
         });
       }
@@ -247,6 +256,7 @@ const PlayerScreen = ({ navigation }) => {
       const skipForward = async () => {
         isShuffleOn.current = false;
         if (currentTrackIndex.current >= tracksArr.length - 1) {
+          stopAnimation();
           return;
         } else {
           currentTrackIndex.current++;
@@ -256,9 +266,11 @@ const PlayerScreen = ({ navigation }) => {
           let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
           if (hasNext) {
             currentTrack.current.stop();
+            setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
             currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
               if (error) {
                 console.log(error);
+                stopAnimation();
                 return;
               } else {
                 setplayPauseIcon('ios-pause-outline');
@@ -266,6 +278,7 @@ const PlayerScreen = ({ navigation }) => {
                 currentTrack.current.play((success)=>{
                   if(success){  
                     currentTrack.current = {};
+                    stopAnimation();
                     let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
                     if (hasNext) {
                       //Play next item
@@ -276,10 +289,11 @@ const PlayerScreen = ({ navigation }) => {
                       currentTrack.current.stop();
                       currentTrack.current = {};
                       currentTrackIndex.current = -1;
-                      //currentTrack.current.release();
+                      stopAnimation();
                   }
                   }else{
                     console.log('Issue playing file');
+                    stopAnimation();
                   }
               });
               }
@@ -290,24 +304,27 @@ const PlayerScreen = ({ navigation }) => {
             currentTrack.current.stop();
             currentTrack.current = {};
             currentTrackIndex.current = -1;
+            stopAnimation();
         }
         }
-
     }
   
 
       const skipBack = async () => {
         isShuffleOn.current = false;
         if (currentTrackIndex.current <= -1) {
+          stopAnimation();
           return;
         } else {
           currentTrackIndex.current--;
           let hasPrevious = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id);
           if (hasPrevious) {
             currentTrack.current.stop();
+            setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
             currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
               if (error) {
                 console.log(error);
+                stopAnimation();
                 return;
               } else {
                 setplayPauseIcon('ios-pause-outline');
@@ -315,6 +332,7 @@ const PlayerScreen = ({ navigation }) => {
                 currentTrack.current.play((success)=>{
                   if(success){  
                     currentTrack.current = {};
+                    stopAnimation();
                     let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
                     if (hasNext) {
                       //Play next item
@@ -325,10 +343,11 @@ const PlayerScreen = ({ navigation }) => {
                       currentTrack.current.stop();
                       currentTrack.current = {};
                       currentTrackIndex.current = -1;
-                      //currentTrack.current.release();
+                      stopAnimation();
                   }
                   }else{
                     console.log('Issue playing file');
+                    stopAnimation();
                   }
               });
               }
@@ -339,6 +358,7 @@ const PlayerScreen = ({ navigation }) => {
             currentTrack.current.stop();
             currentTrack.current = {};
             currentTrackIndex.current = -1;
+            stopAnimation();
         }
         }
 
