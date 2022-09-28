@@ -60,5 +60,9 @@
 		<string>LobsterTwo-Italic.ttf</string>
 		<string>LobsterTwo-Regular.ttf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+  		<string>audio</string>
+	</array>
 </dict>
 </plist>
