@@ -1,14 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Alert } from 'react';
 import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleSheet, Animated, Dimensions } from 'react-native';
 import { getAllTracks } from './../utils/getTracks';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
+import {
+  MenuContext,
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  MenuProvider
+} from 'react-native-popup-menu';
 
 const PlayerScreen = ({ navigation }) => {
     const screen = Dimensions.get('screen');
     const [selectedId, setSelectedId] = useState(null);
     const [tracksArr, setTracksArr] = useState([]);
+    const [shuffleArr, setShuffleArr] = useState([]);
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
     const songTitleRef = useRef('');
@@ -17,6 +26,7 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrack = useRef({});
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
+    //let shuffleArr = useRef([]);
 
     useEffect(() => {
       (async () => {
@@ -90,14 +100,17 @@ const PlayerScreen = ({ navigation }) => {
         arr.push(track);
         });
         setTracksArr(arr);
+        setShuffleArr(arr);
       }
   
 
     const shuffle = async () => {
       isShuffleOn.current = isShuffleOn.current ? false : true;
       if (isShuffleOn.current) {
+        //let shuffleArr = tracks
         currentTrack.current = {};
         let item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
+
         setSongTitleFromQueue(item);
         currentTrack.current = new Sound(item.url,null,(error)=> {
           if (error) {
@@ -347,13 +360,47 @@ const PlayerScreen = ({ navigation }) => {
             stopAnimation();
         }
         }
-
       }
 
+    const deleteTrack = (item) => {
+      console.log(item);
+      const dirs = ReactNativeBlobUtil.fs.dirs;
+      ReactNativeBlobUtil.fs.unlink(item.url)
+      .then(() => {
+        const index = tracksArr.indexOf(item);
+        if (index > -1) { // only splice array when item is found
+          tracksArr.splice(index, 1); // 2nd parameter means remove one item only
+          setTracksArr(tracksArr);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    }
+    
+
+
+
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
+      
           <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
-            <Text style={[styles.title, textColor]}>{item.id} - {item.title}</Text>
+            <Text style={[styles.title, textColor]}>{item.id} - {item.title}
+            </Text>
+            <Menu onSelect={() => deleteTrack(item)}>
+              <MenuTrigger>
+                      <Icon 
+                      style={styles.flatlisticon}
+                      name={'ios-menu-outline'}
+                      color="white" 
+                      size={20}
+                    />
+              </MenuTrigger>
+              <MenuOptions>
+                <MenuOption value="A" text="Delete" />
+            </MenuOptions>
+          </Menu>
           </TouchableOpacity>
+         
     );
 
 
@@ -378,7 +425,7 @@ const PlayerScreen = ({ navigation }) => {
         <StatusBar barStyle="light-content"/>
         <FlatList
           data={tracksArr}
-          renderItem={renderItem}
+          renderItem={ renderItem }
           keyExtractor={(item) => item.id}
           extraData={selectedId}
         />
@@ -387,7 +434,6 @@ const PlayerScreen = ({ navigation }) => {
       <View style={styles.titlemarquee}>
         <Animated.Text numberOfLines={1} style={[styles.animatedtitle, {transform: [{ translateX: animation }]}]}>{songTitleRef.current}</Animated.Text>
         </View>
-
         <Icon 
             style={styles.skipbackicon}
             name={'ios-play-skip-back-outline'}
@@ -438,6 +484,9 @@ const PlayerScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  flatlisticon: {
+    fontSize: 25,
+  },
   container: {
     flex: 1,
     justifyContent: 'space-between',
@@ -445,12 +494,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#102027',
   },
   item: {
+    flexDirection: 'row',
     padding: 20,
     marginVertical: 3,
     marginHorizontal: 10,
     borderRadius: 5
   },
   title: {
+    flex: 1,
     fontSize: 15,
   },
   footer: {
