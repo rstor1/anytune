@@ -28,7 +28,6 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
-    //let shuffleArr = useRef([]);
 
     useEffect(() => {
       (async () => {
@@ -136,7 +135,6 @@ const PlayerScreen = ({ navigation }) => {
             currentTrackIndex.current = -1;
             stopAnimation();
             isShuffleOn.current = false;
-            // Reset shuffleIndex array
             resetShuffleIndexArr();
             return;
           } else {
@@ -154,7 +152,6 @@ const PlayerScreen = ({ navigation }) => {
                 currentTrackIndex.current = -1;
                 stopAnimation();
                 isShuffleOn.current = false;
-                // Reset shuffleIndex array
                 resetShuffleIndexArr();
               }
             }); 
@@ -162,7 +159,6 @@ const PlayerScreen = ({ navigation }) => {
       });
       }
   
-      // TODO: What about skipping forward when isShuffleOn.current = true?
     const shuffle = async () => {
       isShuffleOn.current = isShuffleOn.current ? false : true;
       if (isShuffleOn.current) {
@@ -284,113 +280,128 @@ const PlayerScreen = ({ navigation }) => {
       }
     });
   }
-  // TODO: skip forward on last song take it to beginning of queue
-  // TODO: check what happens when on shuffle and skip forward. We need to reset shuffleIndex array.
+
       const skipForward = async () => {
-        isShuffleOn.current = false;
-        if (currentTrackIndex.current >= tracksArr.length - 1) {
-          stopAnimation();
-          return;
+        if (isShuffleOn.current) {
+          resetShuffleIndexArr();
+          currentTrack.current.stop();
+          doTheShuffle();
         } else {
-          currentTrackIndex.current++;
-          let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
-          if (hasNext) {
-            currentTrack.current.stop();
-            setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
-            currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
-              if (error) {
-                console.log(error);
-                stopAnimation();
-                return;
-              } else {
-                setplayPauseIcon('ios-pause-outline');
-                setSelectedId(tracksArr[currentTrackIndex.current].id);
-                currentTrack.current.play((success)=>{
-                  if(success){  
-                    currentTrack.current = {};
-                    stopAnimation();
-                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
-                    if (hasNext) {
-                      //Play next item
-                      singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
-                    } else {
-                      setplayPauseIcon('ios-play-outline');
-                      isPlay.current = false;
-                      currentTrack.current.stop();
-                      currentTrack.current = {};
-                      currentTrackIndex.current = -1;
-                      stopAnimation();
-                  }
-                  }else{
-                    console.log('Issue playing file');
-                    stopAnimation();
-                  }
-              });
-              }
-            });
-          } else {
-            setplayPauseIcon('ios-play-outline');
-            isPlay.current = false;
+          if (currentTrackIndex.current >= tracksArr.length - 1) {
             currentTrack.current.stop();
             currentTrack.current = {};
             currentTrackIndex.current = -1;
+            setplayPauseIcon('ios-play-outline');
             stopAnimation();
+            return;
+          } else {
+            currentTrackIndex.current++;
+            let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
+            if (hasNext) {
+              currentTrack.current.stop();
+              setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
+              currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
+                if (error) {
+                  console.log(error);
+                  stopAnimation();
+                  return;
+                } else {
+                  setplayPauseIcon('ios-pause-outline');
+                  setSelectedId(tracksArr[currentTrackIndex.current].id);
+                  currentTrack.current.play((success)=>{
+                    if(success){  
+                      currentTrack.current = {};
+                      stopAnimation();
+                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                      if (hasNext) {
+                        //Play next item
+                        singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
+                      } else {
+                        setplayPauseIcon('ios-play-outline');
+                        isPlay.current = false;
+                        currentTrack.current.stop();
+                        currentTrack.current = {};
+                        currentTrackIndex.current = -1;
+                        stopAnimation();
+                    }
+                    }else{
+                      console.log('Issue playing file');
+                      stopAnimation();
+                    }
+                });
+                }
+              });
+            } else {
+              setplayPauseIcon('ios-play-outline');
+              isPlay.current = false;
+              currentTrack.current.stop();
+              currentTrack.current = {};
+              currentTrackIndex.current = -1;
+              stopAnimation();
+          }
         }
         }
+
     }
   
 
       const skipBack = async () => {
-        isShuffleOn.current = false;
-        if (currentTrackIndex.current <= -1) {
-          stopAnimation();
-          return;
+        if (isShuffleOn.current) {
+          resetShuffleIndexArr();
+          currentTrack.current.stop();
+          doTheShuffle();
         } else {
-          currentTrackIndex.current--;
-          let hasPrevious = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id);
-          if (hasPrevious) {
-            currentTrack.current.stop();
-            setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
-            currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
-              if (error) {
-                console.log(error);
-                stopAnimation();
-                return;
-              } else {
-                setplayPauseIcon('ios-pause-outline');
-                setSelectedId(tracksArr[currentTrackIndex.current].id);
-                currentTrack.current.play((success)=>{
-                  if(success){  
-                    currentTrack.current = {};
-                    stopAnimation();
-                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
-                    if (hasNext) {
-                      //Play next item
-                      singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
-                    } else {
-                      setplayPauseIcon('ios-play-outline');
-                      isPlay.current = false;
-                      currentTrack.current.stop();
-                      currentTrack.current = {};
-                      currentTrackIndex.current = -1;
-                      stopAnimation();
-                  }
-                  }else{
-                    console.log('Issue playing file');
-                    stopAnimation();
-                  }
-              });
-              }
-            });
-          } else {
-            setplayPauseIcon('ios-play-outline');
-            isPlay.current = false;
-            currentTrack.current.stop();
-            currentTrack.current = {};
-            currentTrackIndex.current = -1;
+          if (currentTrackIndex.current <= -1) {
             stopAnimation();
+            return;
+          } else {
+            currentTrackIndex.current--;
+            let hasPrevious = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id);
+            if (hasPrevious) {
+              currentTrack.current.stop();
+              setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
+              currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
+                if (error) {
+                  console.log(error);
+                  stopAnimation();
+                  return;
+                } else {
+                  setplayPauseIcon('ios-pause-outline');
+                  setSelectedId(tracksArr[currentTrackIndex.current].id);
+                  currentTrack.current.play((success)=>{
+                    if(success){  
+                      currentTrack.current = {};
+                      stopAnimation();
+                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                      if (hasNext) {
+                        //Play next item
+                        singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
+                      } else {
+                        setplayPauseIcon('ios-play-outline');
+                        isPlay.current = false;
+                        currentTrack.current.stop();
+                        currentTrack.current = {};
+                        currentTrackIndex.current = -1;
+                        stopAnimation();
+                    }
+                    }else{
+                      console.log('Issue playing file');
+                      stopAnimation();
+                    }
+                });
+                }
+              });
+            } else {
+              setplayPauseIcon('ios-play-outline');
+              isPlay.current = false;
+              currentTrack.current.stop();
+              currentTrack.current = {};
+              currentTrackIndex.current = -1;
+              stopAnimation();
+          }
+          }
         }
-        }
+
       }
 
     const deleteTrack = (item) => {
