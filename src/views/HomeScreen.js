@@ -33,6 +33,11 @@ const HomeScreen = ({ navigation }) => {
           }).then(() => {
             setIsLoading(false);
             setDownloadButtonDisabled(false);
+          }).catch((error) => {
+            setIsLoading(false);
+            setHasMessage(false);
+            setDownloadButtonDisabled(false);
+            setMessageText('Download failed. Please try again.');
           });
         } else {
           setIsLoading(false);
