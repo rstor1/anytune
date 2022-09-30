@@ -82,7 +82,6 @@ const PlayerScreen = ({ navigation }) => {
       }
 
     const addTracksToPlayer = async(data) => {
-      let _data = [];
       const index = data.indexOf('.DS_Store');
       if (index > -1) {
         data.splice(index,1);
@@ -96,12 +95,12 @@ const PlayerScreen = ({ navigation }) => {
             title: item.replace(/\.[^/.]+$/, ""),
             isPlaying: false
         };
-        _data.push(index);
         arr.push(track);
         });
         // Sort the songs
         const sorted = sortTracks(arr);
         arr = [];
+        // Now add ids to sorted list of songs
         sorted.forEach((item, index) => {
           item.id = index+1;
           arr.push(item);
@@ -286,6 +285,7 @@ const PlayerScreen = ({ navigation }) => {
     });
   }
   // TODO: skip forward on last song take it to beginning of queue
+  // TODO: check what happens when on shuffle and skip forward. We need to reset shuffleIndex array.
       const skipForward = async () => {
         isShuffleOn.current = false;
         if (currentTrackIndex.current >= tracksArr.length - 1) {
