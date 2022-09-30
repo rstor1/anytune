@@ -18,15 +18,14 @@ export function getMp3Link(url) {
                 axios.request(options).then((response) => {
                     if(response.status == 200) {
                         return resolve(response);
-
                     } else {
                         return reject(null);
                     }
-            }).catch(function (error) {
-                console.error(error);
-                return reject(error);
-            });
-              })
+                }).catch(function (error) {
+                    console.error(error);
+                    return reject(error);
+                });
+          });
 };
 
 

@@ -42,7 +42,10 @@ const HomeScreen = ({ navigation }) => {
         }
       }).catch((error) => {
         console.log('error: ', error);
-      })
+        setIsLoading(false);
+        setDownloadButtonDisabled(false);
+        setMessageText('Download failed. Please try again.');
+      });
     }
   };
 
