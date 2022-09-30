@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Alert } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleSheet, Animated, Dimensions } from 'react-native';
 import { getAllTracks } from './../utils/getTracks';
 import ReactNativeBlobUtil from 'react-native-blob-util';
@@ -21,6 +21,7 @@ const PlayerScreen = ({ navigation }) => {
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
     const songTitleRef = useRef('');
+    const [refreshFlatlist, setRefreshFlatList] = useState(false);
     let tracks = useRef([]);
     let isShuffleOn = useRef(false);
     let currentTrack = useRef({});
@@ -87,20 +88,36 @@ const PlayerScreen = ({ navigation }) => {
         data.splice(index,1);
       }
         const dirs = ReactNativeBlobUtil.fs.dirs;
-        const arr = [];
+        let arr = [];
         let title = '';
-        // First remove .DS Store elememt?
         data.forEach((item, index) => {
           const track = {
-            id: index+1,
+            //id: index+1,
             url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
             title: item.replace(/\.[^/.]+$/, ""),
             isPlaying: false
         };
         arr.push(track);
         });
-        setTracksArr(arr);
-        setShuffleArr(arr);
+        
+        // Sort. At this point the indexes are not sorted. Need to fix it.
+        const sorted = sortTracks(arr);
+        arr = [];
+        sorted.forEach((item, index) => {
+          item.id = index+1;
+          arr.push(item);
+        });
+        setTracksArr(sorted);
+        setShuffleArr(sorted);
+      }
+
+      const sortTracks = (arr) => {
+        arr.sort(function(a, b){
+          if(a.title < b.title) { return -1; }
+          if(a.title > b.title) { return 1; }
+          return 0;
+        });
+        return arr;
       }
   
 
@@ -363,23 +380,32 @@ const PlayerScreen = ({ navigation }) => {
       }
 
     const deleteTrack = (item) => {
-      console.log(item);
-      const dirs = ReactNativeBlobUtil.fs.dirs;
-      ReactNativeBlobUtil.fs.unlink(item.url)
-      .then(() => {
-        const index = tracksArr.indexOf(item);
-        if (index > -1) { // only splice array when item is found
-          tracksArr.splice(index, 1); // 2nd parameter means remove one item only
-          setTracksArr(tracksArr);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+      const arr = [];
+      const index = tracksArr.findIndex(object => {
+        return object.id === item.id;
+      });
+      if (index > -1) {
+        tracksArr.splice(index, 1);
+        tracksArr.forEach((_item, _index) => {
+          _item.id = _index+1;
+          arr.push(_item);
+        });
+        setRefreshFlatList(!refreshFlatlist);
+        setTracksArr(tracksArr);
+        const filePath = item.url.split('///').pop();  // removes leading file:///
+        ReactNativeBlobUtil.fs.unlink(filePath)
+        .then(() => {
+          console.log('Track deleted');
+          currentTrack.current.stop();
+          currentTrack.current = {};
+          currentTrackIndex.current = -1;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      }
     }
     
-
-
 
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
       
@@ -396,11 +422,11 @@ const PlayerScreen = ({ navigation }) => {
                     />
               </MenuTrigger>
               <MenuOptions>
-                <MenuOption value="A" text="Delete" />
+                <MenuOption style={styles.menuoption} value="A" text="Delete" />
             </MenuOptions>
           </Menu>
           </TouchableOpacity>
-         
+        
     );
 
 
@@ -427,8 +453,9 @@ const PlayerScreen = ({ navigation }) => {
           data={tracksArr}
           renderItem={ renderItem }
           keyExtractor={(item) => item.id}
-          extraData={selectedId}
+          extraData={refreshFlatlist}
         />
+        </SafeAreaView>
         {/* Footer */}
       <View style={styles.footer}>
       <View style={styles.titlemarquee}>
@@ -478,21 +505,26 @@ const PlayerScreen = ({ navigation }) => {
           />}
           </Text>
       </View>
-      </SafeAreaView>
+      
       </View>
     );
 };
 
 const styles = StyleSheet.create({
-  flatlisticon: {
-    fontSize: 25,
-  },
+
   container: {
     flex: 1,
     justifyContent: 'space-between',
     marginTop: StatusBar.currentHeight || 0,
     backgroundColor: '#102027',
   },
+  menuoption: {
+    borderRadius: 20
+  },
+  flatlisticon: {
+    fontSize: 25,
+  },
+
   item: {
     flexDirection: 'row',
     padding: 20,
@@ -513,6 +545,8 @@ const styles = StyleSheet.create({
     height: 130,
     position: 'absolute',
     bottom: 0,
+    left:0,
+    right:0
   },
   skipbackicon: {
     flexGrow: 0.1,
