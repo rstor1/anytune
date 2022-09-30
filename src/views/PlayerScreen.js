@@ -27,6 +27,7 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrack = useRef({});
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
+    let shuffleIndex = useRef([]);
     //let shuffleArr = useRef([]);
 
     useEffect(() => {
@@ -39,7 +40,6 @@ const PlayerScreen = ({ navigation }) => {
       });
       return unsubscribe;
       })();
-
   }, [navigation]);
 
     useEffect(() => {
@@ -92,23 +92,28 @@ const PlayerScreen = ({ navigation }) => {
         let title = '';
         data.forEach((item, index) => {
           const track = {
-            //id: index+1,
             url: 'file:///' + dirs.DocumentDir + '/tracks/'+ item, // Load media from the file system
             title: item.replace(/\.[^/.]+$/, ""),
             isPlaying: false
         };
+        _data.push(index);
         arr.push(track);
         });
-        
-        // Sort. At this point the indexes are not sorted. Need to fix it.
+        // Sort the songs
         const sorted = sortTracks(arr);
         arr = [];
         sorted.forEach((item, index) => {
           item.id = index+1;
           arr.push(item);
+          shuffleIndex.current.push(index);
         });
-        setTracksArr(sorted);
-        setShuffleArr(sorted);
+        setTracksArr(arr);
+      }
+
+      const resetShuffleIndexArr = () => {
+        tracksArr.forEach((item, index) => {
+          shuffleIndex.current.push(index);
+        });
       }
 
       const sortTracks = (arr) => {
@@ -119,47 +124,59 @@ const PlayerScreen = ({ navigation }) => {
         });
         return arr;
       }
-  
 
-    const shuffle = async () => {
-      isShuffleOn.current = isShuffleOn.current ? false : true;
-      if (isShuffleOn.current) {
-        //let shuffleArr = tracks
+      const doTheShuffle = () => {
         currentTrack.current = {};
-        let item = tracksArr[Math.floor(Math.random()*tracksArr.length)];
-
+        let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
+        shuffleIndex.current.slice(index, 1);
+        let item = tracksArr[index];
         setSongTitleFromQueue(item);
         currentTrack.current = new Sound(item.url,null,(error)=> {
           if (error) {
             console.log(error);
             currentTrackIndex.current = -1;
             stopAnimation();
+            isShuffleOn.current = false;
+            // Reset shuffleIndex array
+            resetShuffleIndexArr();
             return;
           } else {
+            isShuffleOn.current = true;
             setplayPauseIcon('ios-pause-outline');
             setSelectedId(item.id);
             currentTrack.current.play((success)=>{
               if(success){  
                 stopAnimation();
-                shuffle();              
+                doTheShuffle();              
               }else{
                 console.log('Issue playing file');
                 setplayPauseIcon('ios-play-outline');
                 currentTrack.current = {};
                 currentTrackIndex.current = -1;
                 stopAnimation();
+                isShuffleOn.current = false;
+                // Reset shuffleIndex array
+                resetShuffleIndexArr();
               }
             }); 
           }
       });
+      }
+  
+      // TODO: What about skipping forward when isShuffleOn.current = true?
+    const shuffle = async () => {
+      isShuffleOn.current = isShuffleOn.current ? false : true;
+      if (isShuffleOn.current) {
+        doTheShuffle();
       } else {
         setplayPauseIcon('ios-play-outline');
         currentTrack.current.stop();
         currentTrack.current = {};
         currentTrackIndex.current = -1;
         stopAnimation();
+        isShuffleOn.current = false;
+        resetShuffleIndexArr();
       }
-
   }
 
     const trackPlayer = async () => {
@@ -268,7 +285,7 @@ const PlayerScreen = ({ navigation }) => {
       }
     });
   }
-  
+  // TODO: skip forward on last song take it to beginning of queue
       const skipForward = async () => {
         isShuffleOn.current = false;
         if (currentTrackIndex.current >= tracksArr.length - 1) {
