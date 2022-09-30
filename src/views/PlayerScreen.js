@@ -293,9 +293,6 @@ const PlayerScreen = ({ navigation }) => {
           return;
         } else {
           currentTrackIndex.current++;
-          // Take currentTrackIndex.current plus one to play next. Don't forget to set the index ahead too.
-          // Also setSelectedId to the next item.id to highlight the track.
-          // First check to see if hasNext
           let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
           if (hasNext) {
             currentTrack.current.stop();
