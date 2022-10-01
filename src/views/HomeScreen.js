@@ -65,6 +65,7 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
 
   return (
     <View style={styles.maincontainer}>
+      <StatusBar barStyle="dark-content"/>
       <View style={styles.topcontainer}>
         <Text style={styles.brandfont}>AnyTune</Text>
       </View>
@@ -75,7 +76,8 @@ let activityIndicator =  <View style={[styles.activitycontainer]}>
             keyboardType="default"
             onChangeText={newText => setText(newText)}
             defaultValue={text}
-            placeholder="Enter video url"/>
+            placeholder="Enter video url"
+            placeholderTextColor="#102027"/>
         
         {hasMessage && <Text style={styles.messagetext}>{messageText}</Text>}
 
