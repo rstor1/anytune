@@ -56,6 +56,7 @@
 		9404A18E28CBE19700DC0119 /* anytune-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "anytune-Bridging-Header.h"; sourceTree = "<group>"; };
 		9404A18F28CBE19800DC0119 /* dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dummy.swift; sourceTree = "<group>"; };
 		9407DFEF28D00FAA00C85D6F /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
+		94F9D88528E875EA00888E7A /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		C35EC3C6F1C84728B564C753 /* LobsterTwo-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "LobsterTwo-Italic.ttf"; path = "../src/assets/fonts/LobsterTwo-Italic.ttf"; sourceTree = "<group>"; };
 		C5F29B570F3648938555DDFC /* Lobster-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lobster-Regular.ttf"; path = "../src/assets/fonts/Lobster-Regular.ttf"; sourceTree = "<group>"; };
 		E1CBCB2ACE6849D89AEDDD2E /* LobsterTwo-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "LobsterTwo-Regular.ttf"; path = "../src/assets/fonts/LobsterTwo-Regular.ttf"; sourceTree = "<group>"; };
@@ -103,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				9407DFEE28D00E6100C85D6F /* Fonts */,
+				94F9D88528E875EA00888E7A /* MaterialCommunityIcons.ttf */,
 				9407DFEF28D00FAA00C85D6F /* Ionicons.ttf */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
