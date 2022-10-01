@@ -3,6 +3,8 @@ import { Text, View, FlatList, SafeAreaView, TouchableOpacity, StatusBar, StyleS
 import { getAllTracks } from './../utils/getTracks';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MatCommIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import Sound from 'react-native-sound';
 import {
   MenuContext,
@@ -439,9 +441,9 @@ const PlayerScreen = ({ navigation }) => {
             </Text>
             <Menu onSelect={() => deleteTrack(item)}>
               <MenuTrigger>
-                      <Icon 
+                      <MatCommIcon 
                       style={styles.flatlisticon}
-                      name={'ios-menu-outline'}
+                      name={'dots-vertical'}
                       color="white" 
                       size={20}
                     />
@@ -507,14 +509,21 @@ const PlayerScreen = ({ navigation }) => {
             onPress={() => skipForward()}
             size={40}
           />
-          <Icon 
+          {isShuffleOn.current && <Icon
+            style={styles.shuffleicon}
+            name={'ios-shuffle-outline'}
+            color={'#39f705'} 
+            onPress={() => shuffle()}
+            size={40}
+          />}
+          {!isShuffleOn.current && <Icon 
             style={styles.shuffleicon}
             name={'ios-shuffle-outline'}
             color="white" 
             onPress={() => shuffle()}
             size={40}
-          />
-          <Text numberOfLines={1} style={styles.shuffletext}>
+          />}
+          {/* <Text numberOfLines={1} style={styles.shuffletext}>
             Shuffle{' '}
             {isShuffleOn.current && <Icon 
             style={styles.shuffleradio}
@@ -528,7 +537,7 @@ const PlayerScreen = ({ navigation }) => {
             color={'#97abb5'}
             size={15}
           />}
-          </Text>
+          </Text> */}
       </View>
       
       </View>
