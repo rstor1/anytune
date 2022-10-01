@@ -569,13 +569,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 130,
     position: 'absolute',
-    bottom: 0,
-    left:0,
-    right:0
+    bottom: 0
   },
   skipbackicon: {
     flexGrow: 0.1,
-    flexBasis: 25,
+    flexBasis: 20,
   },
   playicon: {
     flexGrow: 0.1,
@@ -587,7 +585,7 @@ const styles = StyleSheet.create({
   },
   shuffleicon: {
     flexGrow: 0.1,
-    flexBasis: 20,
+    flexBasis: 10,
   },
   shuffletext: {
     flexGrow: 0.2,
