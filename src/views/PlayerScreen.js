@@ -449,7 +449,7 @@ const PlayerScreen = ({ navigation }) => {
                       size={20}
                     />
               </MenuTrigger>
-              <MenuOptions style={styles.menuoption}>
+              <MenuOptions optionsContainerStyle={{width:100, borderRadius:5}}>
                 <MenuOption value="A" text="Delete" />
             </MenuOptions>
           </Menu>
@@ -536,9 +536,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: StatusBar.currentHeight || 0,
     backgroundColor: '#102027',
-  },
-  menuoption: {
-    borderRadius: 20,
   },
   flatlisticon: {
     fontSize: 25,
