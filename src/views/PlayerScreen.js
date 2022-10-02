@@ -19,7 +19,6 @@ const PlayerScreen = ({ navigation }) => {
     const screen = Dimensions.get('screen');
     const [selectedId, setSelectedId] = useState(null);
     const [tracksArr, setTracksArr] = useState([]);
-    const [shuffleArr, setShuffleArr] = useState([]);
     const [playPauseIcon, setplayPauseIcon] = useState('ios-play-outline');
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
     const songTitleRef = useRef('');
@@ -32,11 +31,6 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
-
-    // useEffect(() => {
-    //   //isShuffleOn ? setIsShuffleOn(false) : setIsShuffleOn(true);
-    //   //shuffle();
-    // }, [isShuffleOn]);
   
 
     useEffect(() => {
@@ -142,7 +136,7 @@ const PlayerScreen = ({ navigation }) => {
             shuffleIndex.current.slice(index, 1);
             let item = tracksArr[index];
             setSongTitleFromQueue(item);
-            //flatList.current.scrollToIndex({index: item.id-1});
+            flatList.current.scrollToIndex({index: index});
             currentTrack.current = new Sound(item.url,null,(error)=> {
               if (error) {
                 console.log(error);
@@ -163,12 +157,6 @@ const PlayerScreen = ({ navigation }) => {
                     resetCurrentTrack();
                     resetShuffleState();
                     console.log('Issue playing file');
-                    // setplayPauseIcon('ios-play-outline');
-                    // currentTrack.current = {};
-                    // currentTrackIndex.current = -1;
-                    // stopAnimation();
-                    // setIsShuffleOnState(false);
-                    // resetShuffleIndexArr();
                   }
                 }); 
               }
@@ -465,8 +453,7 @@ const PlayerScreen = ({ navigation }) => {
                 <MenuOption value="A" text="Delete" />
             </MenuOptions>
           </Menu>
-          </TouchableOpacity>
-        
+          </TouchableOpacity> 
     );
 
 
@@ -552,12 +539,10 @@ const styles = StyleSheet.create({
   },
   menuoption: {
     borderRadius: 20,
-    //width: '20%'
   },
   flatlisticon: {
     fontSize: 25,
   },
-
   item: {
     flexDirection: 'row',
     padding: 20,
@@ -618,8 +603,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     position: 'absolute',
     top: 10
-  },
-  shuffleradio: {
   }
 });
 
