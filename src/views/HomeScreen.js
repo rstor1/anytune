@@ -15,6 +15,7 @@ const HomeScreen = ({ navigation }) => {
   const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
 
   function onPressConvert() {
+    setMessageText('');
     if (text === undefined || text === "" || text === null || !validateUrl(text)) {
       setHasMessage(true);
       setMessageText('Please enter a valid url');

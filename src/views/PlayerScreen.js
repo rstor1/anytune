@@ -24,17 +24,26 @@ const PlayerScreen = ({ navigation }) => {
     const animation = useRef(new Animated.Value(screen.width*-1)).current;
     const songTitleRef = useRef('');
     const [refreshFlatlist, setRefreshFlatList] = useState(false);
+    const flatList = useRef(FlatList);
     let tracks = useRef([]);
+    let [isShuffleOnState, setIsShuffleOnState] = useState(false);
     let isShuffleOn = useRef(false);
     let currentTrack = useRef({});
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
 
+    // useEffect(() => {
+    //   //isShuffleOn ? setIsShuffleOn(false) : setIsShuffleOn(true);
+    //   //shuffle();
+    // }, [isShuffleOn]);
+  
+
     useEffect(() => {
       (async () => {
         const unsubscribe = navigation.addListener('blur', () => {
           if (Object.keys(currentTrack.current).length !== 0) {
+            shuffleIndex.current = [];
             currentTrack.current.stop();
             currentTrack.current.release();
           }
@@ -111,6 +120,7 @@ const PlayerScreen = ({ navigation }) => {
       }
 
       const resetShuffleIndexArr = () => {
+        shuffleIndex.current = [];
         tracksArr.forEach((item, index) => {
           shuffleIndex.current.push(index);
         });
@@ -125,55 +135,79 @@ const PlayerScreen = ({ navigation }) => {
         return arr;
       }
 
-      const doTheShuffle = () => {
-        currentTrack.current = {};
-        let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
-        shuffleIndex.current.slice(index, 1);
-        let item = tracksArr[index];
-        setSongTitleFromQueue(item);
-        currentTrack.current = new Sound(item.url,null,(error)=> {
-          if (error) {
-            console.log(error);
-            currentTrackIndex.current = -1;
-            stopAnimation();
-            isShuffleOn.current = false;
-            resetShuffleIndexArr();
-            return;
-          } else {
-            isShuffleOn.current = true;
-            setplayPauseIcon('ios-pause-outline');
-            setSelectedId(item.id);
-            currentTrack.current.play((success)=>{
-              if(success){  
-                stopAnimation();
-                doTheShuffle();              
-              }else{
-                console.log('Issue playing file');
-                setplayPauseIcon('ios-play-outline');
-                currentTrack.current = {};
+      const doTheShuffle = async () => {
+          currentTrack.current = {};
+          if (shuffleIndex.current.length > 0) {
+            let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
+            shuffleIndex.current.slice(index, 1);
+            let item = tracksArr[index];
+            setSongTitleFromQueue(item);
+            //flatList.current.scrollToIndex({index: item.id-1});
+            currentTrack.current = new Sound(item.url,null,(error)=> {
+              if (error) {
+                console.log(error);
                 currentTrackIndex.current = -1;
                 stopAnimation();
-                isShuffleOn.current = false;
+                setIsShuffleOnState(false);
                 resetShuffleIndexArr();
+                return;
+              } else {
+                setIsShuffleOnState(true);
+                setplayPauseIcon('ios-pause-outline');
+                setSelectedId(item.id);
+                currentTrack.current.play((success)=>{
+                  if(success){  
+                    stopAnimation();
+                    doTheShuffle();              
+                  }else{
+                    resetCurrentTrack();
+                    resetShuffleState();
+                    console.log('Issue playing file');
+                    // setplayPauseIcon('ios-play-outline');
+                    // currentTrack.current = {};
+                    // currentTrackIndex.current = -1;
+                    // stopAnimation();
+                    // setIsShuffleOnState(false);
+                    // resetShuffleIndexArr();
+                  }
+                }); 
               }
-            }); 
+          });
+          } else {
+            return;
           }
-      });
       }
   
     const shuffle = async () => {
       isShuffleOn.current = isShuffleOn.current ? false : true;
-      if (isShuffleOn.current) {
-        doTheShuffle();
-      } else {
-        setplayPauseIcon('ios-play-outline');
+      isShuffleOnState ? setIsShuffleOnState(false) : setIsShuffleOnState(true);
+      if (isPlay.current) {
+        isPlay.current = false;
         currentTrack.current.stop();
-        currentTrack.current = {};
-        currentTrackIndex.current = -1;
-        stopAnimation();
-        isShuffleOn.current = false;
-        resetShuffleIndexArr();
+        if (isShuffleOn.current) {
+          doTheShuffle();
+        }
+      } else {
+        if (isShuffleOn.current) {
+          doTheShuffle();
+        } else {
+          resetShuffleState();
+          resetCurrentTrack();
+        }
       }
+  }
+
+  const resetShuffleState = async () => {
+    setIsShuffleOnState(false);
+    resetShuffleIndexArr();
+  }
+
+  const resetCurrentTrack = async () => {
+    stopAnimation();
+    setplayPauseIcon('ios-play-outline');
+    currentTrack.current.stop();
+    currentTrack.current = {};
+    currentTrackIndex.current = -1;
   }
 
     const trackPlayer = async () => {
@@ -203,6 +237,7 @@ const PlayerScreen = ({ navigation }) => {
             if (error) {
               console.log(error);
               currentTrackIndex.current = -1;
+              isPlay.current = false;
               return;
             } else {
                 setplayPauseIcon('ios-pause-outline');
@@ -210,22 +245,20 @@ const PlayerScreen = ({ navigation }) => {
                 currentTrack.current.play((success)=>{
                   if(success){  
                     currentTrack.current = {};
+                    isPlay.current = false;
                     stopAnimation();
                     // Play next track if exists in tracksArr
                     let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
                     if (hasNext) {
                       trackPlayer();
                     } else {
-                      stopAnimation();
-                      setplayPauseIcon('ios-play-outline');
+                      resetCurrentTrack();
                       isPlay.current = false;
-                      currentTrack.current.stop();
-                      currentTrack.current = {};
-                      currentTrackIndex.current = -1;
                     }
                   }else{
                     stopAnimation();
                     console.log('Issue playing file');
+                    isPlay.current = false;
                   }
                 });  
             }  
@@ -235,11 +268,12 @@ const PlayerScreen = ({ navigation }) => {
         currentTrack.current.pause();
         stopAnimation();
         setplayPauseIcon('ios-play-outline');
+        isPlay.current = false;
       }
     }
 
     const singleTrackPlayBack = async (item) => {
-      isShuffleOn.current = false;
+      setIsShuffleOnState(false);
       currentTrackIndex.current = item.id-1;
       item.isPlaying = item.isPlaying ? false : true;
       // If there is a current track, stop it, empty it to set it to item.
@@ -249,10 +283,12 @@ const PlayerScreen = ({ navigation }) => {
         stopAnimation();
       }
         setSongTitleFromQueue(item);
+        isPlay.current = true;
         currentTrack.current = new Sound(item.url,null,(error)=> {
           if (error) {
             console.log(error);
             currentTrackIndex.current = -1;
+            isPlay.current = false;
             stopAnimation();
             return;
           } else {
@@ -261,21 +297,19 @@ const PlayerScreen = ({ navigation }) => {
             currentTrack.current.play((success)=>{
               if(success){  
                 currentTrack.current = {};
+                isPlay.current = false;
                 stopAnimation();
                 let hasNext = tracksArr.find(x => x.id == item.id+1);
                 if (hasNext) {
                   //Play next item
                   singleTrackPlayBack(tracksArr[item.id]);
                 } else {
-                  setplayPauseIcon('ios-play-outline');
+                  resetCurrentTrack();
                   isPlay.current = false;
-                  currentTrack.current.stop();
-                  currentTrack.current = {};
-                  currentTrackIndex.current = -1;
-                  stopAnimation();
                 }
           }else{
             console.log('Issue playing file');
+            isPlay.current = false;
             stopAnimation();
           }
         });
@@ -285,16 +319,11 @@ const PlayerScreen = ({ navigation }) => {
 
       const skipForward = async () => {
         if (isShuffleOn.current) {
-          resetShuffleIndexArr();
-          currentTrack.current.stop();
-          doTheShuffle();
-        } else {
+          setIsShuffleOnState(false);
+          isShuffleOn.current = false;
+        }
           if (currentTrackIndex.current >= tracksArr.length - 1) {
-            currentTrack.current.stop();
-            currentTrack.current = {};
-            currentTrackIndex.current = -1;
-            setplayPauseIcon('ios-play-outline');
-            stopAnimation();
+            resetCurrentTrack();
             return;
           } else {
             currentTrackIndex.current++;
@@ -308,6 +337,7 @@ const PlayerScreen = ({ navigation }) => {
                   stopAnimation();
                   return;
                 } else {
+                  isPlay.current = true;
                   setplayPauseIcon('ios-pause-outline');
                   setSelectedId(tracksArr[currentTrackIndex.current].id);
                   currentTrack.current.play((success)=>{
@@ -319,12 +349,8 @@ const PlayerScreen = ({ navigation }) => {
                         //Play next item
                         singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
                       } else {
-                        setplayPauseIcon('ios-play-outline');
+                        resetCurrentTrack();
                         isPlay.current = false;
-                        currentTrack.current.stop();
-                        currentTrack.current = {};
-                        currentTrackIndex.current = -1;
-                        stopAnimation();
                     }
                     }else{
                       console.log('Issue playing file');
@@ -334,25 +360,18 @@ const PlayerScreen = ({ navigation }) => {
                 }
               });
             } else {
-              setplayPauseIcon('ios-play-outline');
+              resetCurrentTrack();
               isPlay.current = false;
-              currentTrack.current.stop();
-              currentTrack.current = {};
-              currentTrackIndex.current = -1;
-              stopAnimation();
           }
         }
-        }
-
     }
   
 
       const skipBack = async () => {
         if (isShuffleOn.current) {
-          resetShuffleIndexArr();
-          currentTrack.current.stop();
-          doTheShuffle();
-        } else {
+          setIsShuffleOnState(false);
+          isShuffleOn.current = false;
+        }
           if (currentTrackIndex.current <= -1) {
             stopAnimation();
             return;
@@ -368,6 +387,7 @@ const PlayerScreen = ({ navigation }) => {
                   stopAnimation();
                   return;
                 } else {
+                  isPlay.current = true;
                   setplayPauseIcon('ios-pause-outline');
                   setSelectedId(tracksArr[currentTrackIndex.current].id);
                   currentTrack.current.play((success)=>{
@@ -379,14 +399,11 @@ const PlayerScreen = ({ navigation }) => {
                         //Play next item
                         singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
                       } else {
-                        setplayPauseIcon('ios-play-outline');
+                        resetCurrentTrack();
                         isPlay.current = false;
-                        currentTrack.current.stop();
-                        currentTrack.current = {};
-                        currentTrackIndex.current = -1;
-                        stopAnimation();
                     }
                     }else{
+                      isPlay.current = false;
                       console.log('Issue playing file');
                       stopAnimation();
                     }
@@ -394,16 +411,10 @@ const PlayerScreen = ({ navigation }) => {
                 }
               });
             } else {
-              setplayPauseIcon('ios-play-outline');
+              resetCurrentTrack();
               isPlay.current = false;
-              currentTrack.current.stop();
-              currentTrack.current = {};
-              currentTrackIndex.current = -1;
-              stopAnimation();
           }
           }
-        }
-
       }
 
     const deleteTrack = (item) => {
@@ -437,8 +448,10 @@ const PlayerScreen = ({ navigation }) => {
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
       
           <TouchableOpacity onPress={onPress} style={[styles.item, backgroundColor]}>
-            <Text style={[styles.title, textColor]}>{item.id} - {item.title}
-            </Text>
+            <Text style={[styles.songnumber, textColor]}>{item.id} - </Text>
+            
+            <Text style={[styles.title, textColor]}>{item.title}</Text>
+            
             <Menu onSelect={() => deleteTrack(item)}>
               <MenuTrigger>
                       <MatCommIcon 
@@ -448,8 +461,8 @@ const PlayerScreen = ({ navigation }) => {
                       size={20}
                     />
               </MenuTrigger>
-              <MenuOptions>
-                <MenuOption style={styles.menuoption} value="A" text="Delete" />
+              <MenuOptions style={styles.menuoption}>
+                <MenuOption value="A" text="Delete" />
             </MenuOptions>
           </Menu>
           </TouchableOpacity>
@@ -477,10 +490,12 @@ const PlayerScreen = ({ navigation }) => {
       <SafeAreaView>
         <StatusBar barStyle="light-content"/>
         <FlatList
+          ref={flatList}
           data={tracksArr}
           renderItem={ renderItem }
           keyExtractor={(item) => item.id}
           extraData={refreshFlatlist}
+          contentContainerStyle={{ paddingBottom: 100 }}
         />
         </SafeAreaView>
         {/* Footer */}
@@ -509,37 +524,20 @@ const PlayerScreen = ({ navigation }) => {
             onPress={() => skipForward()}
             size={40}
           />
-          {isShuffleOn.current && <Icon
+          {isShuffleOnState ? <Icon
             style={styles.shuffleicon}
             name={'ios-shuffle-outline'}
             color={'#39f705'} 
             onPress={() => shuffle()}
             size={40}
-          />}
-          {!isShuffleOn.current && <Icon 
-            style={styles.shuffleicon}
-            name={'ios-shuffle-outline'}
-            color="white" 
-            onPress={() => shuffle()}
-            size={40}
-          />}
-          {/* <Text numberOfLines={1} style={styles.shuffletext}>
-            Shuffle{' '}
-            {isShuffleOn.current && <Icon 
-            style={styles.shuffleradio}
-            name={'ios-radio-button-on-outline'}
-            color={'#39f705'}
-            size={15}
-          />}
-            {!isShuffleOn.current && <Icon 
-            style={styles.shuffleradio}
-            name={'ios-radio-button-off-outline'}
-            color={'#97abb5'}
-            size={15}
-          />}
-          </Text> */}
+          /> : <Icon 
+          style={styles.shuffleicon}
+          name={'ios-shuffle-outline'}
+          color="white" 
+          onPress={() => shuffle()}
+          size={40}
+        /> }
       </View>
-      
       </View>
     );
 };
@@ -553,7 +551,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#102027',
   },
   menuoption: {
-    borderRadius: 20
+    borderRadius: 20,
+    //width: '20%'
   },
   flatlisticon: {
     fontSize: 25,
@@ -566,8 +565,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     borderRadius: 5
   },
-  title: {
+  songnumber: {
     flex: 1,
+    fontSize: 15,
+  },
+  title: {
+    flex: 8,
     fontSize: 15,
   },
   footer: {
