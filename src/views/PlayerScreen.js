@@ -31,6 +31,7 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
+    let [shuffleIndexState, setShuffleIndexState] = useState([]);
   
 
     useEffect(() => {
@@ -110,6 +111,7 @@ const PlayerScreen = ({ navigation }) => {
           arr.push(item);
           shuffleIndex.current.push(index);
         });
+        setShuffleIndexState(shuffleIndex.current);
         setTracksArr(arr);
       }
 
@@ -130,11 +132,20 @@ const PlayerScreen = ({ navigation }) => {
       }
 
       const doTheShuffle = async () => {
+        let item = {};
+        let index = shuffleIndexState[Math.floor(Math.random()*shuffleIndexState.length)];
+        console.log('shuffleIndexState array start: ', shuffleIndexState);
+        console.log('shuffleIndex length start: ', shuffleIndexState.length);
+        console.log('index start: ', index);
+        //shuffleIndex.current.splice(index, 1);
+
           currentTrack.current = {};
-          if (shuffleIndex.current.length > 0) {
-            let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
-            shuffleIndex.current.slice(index, 1);
-            let item = tracksArr[index];
+          if (shuffleIndexState.length) {
+            shuffleIndexState.splice(index, 1);
+            // let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
+            // console.log('index: ', index);
+            //shuffleIndex.current.splice(index, 1);
+            item = tracksArr[index];
             setSongTitleFromQueue(item);
             flatList.current.scrollToIndex({index: index});
             currentTrack.current = new Sound(item.url,null,(error)=> {
@@ -146,12 +157,20 @@ const PlayerScreen = ({ navigation }) => {
                 resetShuffleIndexArr();
                 return;
               } else {
+                //shuffleIndex.current.splice(index, 1);
                 setIsShuffleOnState(true);
                 setplayPauseIcon('ios-pause-outline');
                 setSelectedId(item.id);
                 currentTrack.current.play((success)=>{
                   if(success){  
-                    stopAnimation();
+                    if (shuffleIndexState.length === 0) {
+                      console.log('it equals zero');
+                      shuffleIndexState = [];
+                    }
+                    //shuffleIndexState.splice(index, 1);
+                    console.log('shuffleIndexState array after song: ', shuffleIndexState);
+                    console.log('shuffleIndex length after song: ', shuffleIndexState.length);
+                    console.log('index after song: ', index);
                     doTheShuffle();              
                   }else{
                     resetCurrentTrack();
@@ -162,11 +181,18 @@ const PlayerScreen = ({ navigation }) => {
               }
           });
           } else {
+            isShuffleOn.current = false;
+            resetShuffleState();
+            stopAnimation();
+            setplayPauseIcon('ios-play-outline');
+            currentTrack.current = {};
+            currentTrackIndex.current = -1;
             return;
           }
       }
   
     const shuffle = async () => {
+      console.log('calling shuffle...');
       isShuffleOn.current = isShuffleOn.current ? false : true;
       isShuffleOnState ? setIsShuffleOnState(false) : setIsShuffleOnState(true);
       if (isPlay.current) {
