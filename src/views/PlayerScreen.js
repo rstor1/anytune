@@ -31,11 +31,9 @@ const PlayerScreen = ({ navigation }) => {
     let currentTrackIndex = useRef(-1);
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
-    let [shuffleIndexState, setShuffleIndexState] = useState([]);
     let [shuffleIndexList, updateShuffleIndexList] = useState(shuffleIndex.current);
 
   
-
     useEffect(() => {
       (async () => {
         const unsubscribe = navigation.addListener('blur', () => {
@@ -47,7 +45,7 @@ const PlayerScreen = ({ navigation }) => {
       });
       return unsubscribe;
       })();
-  }, [navigation]);
+    }, [navigation]);
 
     useEffect(() => {
       Sound.setCategory('Playback');
@@ -113,15 +111,15 @@ const PlayerScreen = ({ navigation }) => {
           arr.push(item);
           shuffleIndex.current.push(item);
         });
-        setShuffleIndexState(shuffleIndex.current);
         setTracksArr(arr);
       }
 
       const resetShuffleIndexArr = () => {
         shuffleIndex.current = [];
         tracksArr.forEach((item, index) => {
-          shuffleIndex.current.push(index);
+          shuffleIndex.current.push(item);
         });
+        updateShuffleIndexList(shuffleIndex.current);
       }
 
       const sortTracks = (arr) => {
@@ -136,35 +134,15 @@ const PlayerScreen = ({ navigation }) => {
       
       const doTheShuffle = () => {
         
-        //console.log('cloneShuffleIndexArr start: ', cloneShuffleIndexArr);
-        // do shuffle load the array of indexes and keep it local.
         let item = {};
         let random = Math.floor(Math.random()*shuffleIndexList.length);
-        // if (shuffleIndexList.length === 1) {
-        //   item = shuffleIndexList.splice(0, 1)[0];
-        //   updateShuffleIndexList(shuffleIndexList.splice(0, 1)[0]);
-        // } else {
+
           item = shuffleIndexList.splice(random, 1)[0];
           updateShuffleIndexList(shuffleIndexList);
-        //}
-        //let test = [...shuffleIndexList];//.splice(index, 1);
-        //cloneShuffleIndexArr.slice(index, 1);
-        //console.log('shuffleIndexState array start: ', shuffleIndexState);
-        //console.log('shuffleIndex length start: ', shuffleIndexState.length);
-        //console.log('index start: ', index);
 
-          //currentTrack.current = {};
           if (item !== undefined) {
-            //item = tracksArr[index];
-            //shuffleIndex.current.splice(index, 1);
-
-            //shuffleIndexState.splice(index, 1);
-            // let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
-            // console.log('index: ', index);
-            //shuffleIndex.current.splice(index, 1);
-           
             setSongTitleFromQueue(item);
-            //flatList.current.scrollToIndex({index: item.id-1});
+            flatList.current.scrollToIndex({index: item.id-1});
             
             currentTrack.current = new Sound(item.url,null,(error)=> {
               if (error) {
@@ -175,7 +153,6 @@ const PlayerScreen = ({ navigation }) => {
                 resetShuffleIndexArr();
                 return;
               } else {
-                //cloneShuffleIndexArr.splice(index, 1);
                 setIsShuffleOnState(true);
                 setplayPauseIcon('ios-pause-outline');
                 setSelectedId(item.id);
@@ -183,22 +160,6 @@ const PlayerScreen = ({ navigation }) => {
                   if(success){  
                     currentTrack.current.stop();
                     currentTrack.current = {};
-                    //cloneShuffleIndexArr.splice(index, 1);
-                    //shuffleIndexState.splice(index, 1);
-                    setShuffleIndexState(shuffleIndexList);
-                    console.log('shuffleIndex array after song: ', shuffleIndexList);
-                    // if (cloneShuffleIndexArr.length === 0) {
-                    //   console.log('it equals zero');
-                    //   cloneShuffleIndexArr = [];
-                    //   //shuffleIndex.current.pop();
-                    //   //shuffleIndex.current = [];
-                    //   setShuffleIndexState(cloneShuffleIndexArr);
-                    //   //console.log
-                    // }
-                    //shuffleIndexState.splice(index, 1);
-                    // console.log('shuffleIndexState array after song: ', shuffleIndexState);
-                    // console.log('shuffleIndex length after song: ', shuffleIndexState.length);
-                    // console.log('index after song: ', index);
                     doTheShuffle();              
                   }else{
                     resetCurrentTrack();
@@ -217,27 +178,21 @@ const PlayerScreen = ({ navigation }) => {
             currentTrackIndex.current = -1;
             return;
           }
-          const inner = () => {
-            // then inner calls doTheShuffle()
-
-          }
       }
   
     const shuffle = () => {
-      console.log('calling shuffle...');
       isShuffleOn.current = isShuffleOn.current ? false : true;
       isShuffleOnState ? setIsShuffleOnState(false) : setIsShuffleOnState(true);
       if (isPlay.current) {
         isPlay.current = false;
+        stopAnimation();
         currentTrack.current.stop();
+        setplayPauseIcon('ios-play-outline');
         if (isShuffleOn.current) {
-          //const cloneShuffleIndexArr = [...shuffleIndex.current];
           doTheShuffle();
         }
       } else {
         if (isShuffleOn.current) {
-          console.log(shuffleIndex.current);
-          //const cloneShuffleIndexArr = [...shuffleIndex.current];
           doTheShuffle();
         } else {
           resetShuffleState();
@@ -254,9 +209,11 @@ const PlayerScreen = ({ navigation }) => {
   const resetCurrentTrack = async () => {
     stopAnimation();
     setplayPauseIcon('ios-play-outline');
-    currentTrack.current.stop();
-    currentTrack.current = {};
-    currentTrackIndex.current = -1;
+    if (Object.keys(currentTrack.current).length !== 0) {
+      currentTrack.current.stop();
+    }
+      currentTrack.current = {};
+      currentTrackIndex.current = -1;
   }
 
     const trackPlayer = async () => {
