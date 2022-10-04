@@ -32,6 +32,8 @@ const PlayerScreen = ({ navigation }) => {
     let isPlay = useRef(false);
     let shuffleIndex = useRef([]);
     let [shuffleIndexState, setShuffleIndexState] = useState([]);
+    let [shuffleIndexList, updateShuffleIndexList] = useState(shuffleIndex.current);
+
   
 
     useEffect(() => {
@@ -109,7 +111,7 @@ const PlayerScreen = ({ navigation }) => {
         sorted.forEach((item, index) => {
           item.id = index+1;
           arr.push(item);
-          shuffleIndex.current.push(index);
+          shuffleIndex.current.push(item);
         });
         setShuffleIndexState(shuffleIndex.current);
         setTracksArr(arr);
@@ -131,23 +133,39 @@ const PlayerScreen = ({ navigation }) => {
         return arr;
       }
 
-      const doTheShuffle = async () => {
+      
+      const doTheShuffle = () => {
+        
+        //console.log('cloneShuffleIndexArr start: ', cloneShuffleIndexArr);
+        // do shuffle load the array of indexes and keep it local.
         let item = {};
-        let index = shuffleIndexState[Math.floor(Math.random()*shuffleIndexState.length)];
-        console.log('shuffleIndexState array start: ', shuffleIndexState);
-        console.log('shuffleIndex length start: ', shuffleIndexState.length);
-        console.log('index start: ', index);
-        //shuffleIndex.current.splice(index, 1);
+        let random = Math.floor(Math.random()*shuffleIndexList.length);
+        // if (shuffleIndexList.length === 1) {
+        //   item = shuffleIndexList.splice(0, 1)[0];
+        //   updateShuffleIndexList(shuffleIndexList.splice(0, 1)[0]);
+        // } else {
+          item = shuffleIndexList.splice(random, 1)[0];
+          updateShuffleIndexList(shuffleIndexList);
+        //}
+        //let test = [...shuffleIndexList];//.splice(index, 1);
+        //cloneShuffleIndexArr.slice(index, 1);
+        //console.log('shuffleIndexState array start: ', shuffleIndexState);
+        //console.log('shuffleIndex length start: ', shuffleIndexState.length);
+        //console.log('index start: ', index);
 
-          currentTrack.current = {};
-          if (shuffleIndexState.length) {
-            shuffleIndexState.splice(index, 1);
+          //currentTrack.current = {};
+          if (item !== undefined) {
+            //item = tracksArr[index];
+            //shuffleIndex.current.splice(index, 1);
+
+            //shuffleIndexState.splice(index, 1);
             // let index = shuffleIndex.current[Math.floor(Math.random()*shuffleIndex.current.length)];
             // console.log('index: ', index);
             //shuffleIndex.current.splice(index, 1);
-            item = tracksArr[index];
+           
             setSongTitleFromQueue(item);
-            flatList.current.scrollToIndex({index: index});
+            //flatList.current.scrollToIndex({index: item.id-1});
+            
             currentTrack.current = new Sound(item.url,null,(error)=> {
               if (error) {
                 console.log(error);
@@ -157,20 +175,30 @@ const PlayerScreen = ({ navigation }) => {
                 resetShuffleIndexArr();
                 return;
               } else {
-                //shuffleIndex.current.splice(index, 1);
+                //cloneShuffleIndexArr.splice(index, 1);
                 setIsShuffleOnState(true);
                 setplayPauseIcon('ios-pause-outline');
                 setSelectedId(item.id);
                 currentTrack.current.play((success)=>{
                   if(success){  
-                    if (shuffleIndexState.length === 0) {
-                      console.log('it equals zero');
-                      shuffleIndexState = [];
-                    }
+                    currentTrack.current.stop();
+                    currentTrack.current = {};
+                    //cloneShuffleIndexArr.splice(index, 1);
                     //shuffleIndexState.splice(index, 1);
-                    console.log('shuffleIndexState array after song: ', shuffleIndexState);
-                    console.log('shuffleIndex length after song: ', shuffleIndexState.length);
-                    console.log('index after song: ', index);
+                    setShuffleIndexState(shuffleIndexList);
+                    console.log('shuffleIndex array after song: ', shuffleIndexList);
+                    // if (cloneShuffleIndexArr.length === 0) {
+                    //   console.log('it equals zero');
+                    //   cloneShuffleIndexArr = [];
+                    //   //shuffleIndex.current.pop();
+                    //   //shuffleIndex.current = [];
+                    //   setShuffleIndexState(cloneShuffleIndexArr);
+                    //   //console.log
+                    // }
+                    //shuffleIndexState.splice(index, 1);
+                    // console.log('shuffleIndexState array after song: ', shuffleIndexState);
+                    // console.log('shuffleIndex length after song: ', shuffleIndexState.length);
+                    // console.log('index after song: ', index);
                     doTheShuffle();              
                   }else{
                     resetCurrentTrack();
@@ -189,9 +217,13 @@ const PlayerScreen = ({ navigation }) => {
             currentTrackIndex.current = -1;
             return;
           }
+          const inner = () => {
+            // then inner calls doTheShuffle()
+
+          }
       }
   
-    const shuffle = async () => {
+    const shuffle = () => {
       console.log('calling shuffle...');
       isShuffleOn.current = isShuffleOn.current ? false : true;
       isShuffleOnState ? setIsShuffleOnState(false) : setIsShuffleOnState(true);
@@ -199,10 +231,13 @@ const PlayerScreen = ({ navigation }) => {
         isPlay.current = false;
         currentTrack.current.stop();
         if (isShuffleOn.current) {
+          //const cloneShuffleIndexArr = [...shuffleIndex.current];
           doTheShuffle();
         }
       } else {
         if (isShuffleOn.current) {
+          console.log(shuffleIndex.current);
+          //const cloneShuffleIndexArr = [...shuffleIndex.current];
           doTheShuffle();
         } else {
           resetShuffleState();
