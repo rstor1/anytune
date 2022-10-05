@@ -49,6 +49,12 @@ const PlayerScreen = ({ navigation }) => {
     MusicControl.on(Command.play, ()=> {
       trackPlayer();
     });
+    MusicControl.on(Command.nextTrack, ()=> {
+      skipForward();
+    });
+    MusicControl.on(Command.previousTrack, ()=> {
+      skipBack();
+    });
 
     useEffect(() => {
       (async () => {
@@ -152,7 +158,6 @@ const PlayerScreen = ({ navigation }) => {
 
       
       const doTheShuffle = () => {
-        
         let item = {};
         let random = Math.floor(Math.random()*shuffleIndexList.length);
 
@@ -170,6 +175,7 @@ const PlayerScreen = ({ navigation }) => {
                 stopAnimation();
                 setIsShuffleOnState(false);
                 resetShuffleIndexArr();
+                MusicControl.resetNowPlaying();
                 return;
               } else {
                 setIsShuffleOnState(true);
@@ -181,11 +187,17 @@ const PlayerScreen = ({ navigation }) => {
                     currentTrack.current = {};
                     doTheShuffle();              
                   }else{
+                    MusicControl.resetNowPlaying();
                     resetCurrentTrack();
                     resetShuffleState();
                     console.log('Issue playing file');
                   }
                 }); 
+                // Set lockscreen after play call
+                MusicControl.setNowPlaying({
+                  title: item.title,
+                  duration: currentTrack.current.getDuration()
+                });
               }
           });
           } else {
@@ -195,6 +207,7 @@ const PlayerScreen = ({ navigation }) => {
             setplayPauseIcon('ios-play-outline');
             currentTrack.current = {};
             currentTrackIndex.current = -1;
+            MusicControl.resetNowPlaying();
             return;
           }
       }
@@ -259,7 +272,8 @@ const PlayerScreen = ({ navigation }) => {
           });
           // Set lockscreen after play call
           MusicControl.setNowPlaying({
-            title: tracksArr[currentTrackIndex.current].title,
+            title: songTitleRef.current,
+            duration: currentTrack.current.getDuration()
           });
         } else {
           currentTrackIndex.current++;
@@ -292,10 +306,11 @@ const PlayerScreen = ({ navigation }) => {
                     console.log('Issue playing file');
                     isPlay.current = false;
                   }
-                });  
+                }); 
                 // Set lockscreen after play call
                 MusicControl.setNowPlaying({
                   title: tracksArr[currentTrackIndex.current].title,
+                  duration: currentTrack.current.getDuration()
                 });
             }  
           });
@@ -317,6 +332,7 @@ const PlayerScreen = ({ navigation }) => {
       if (Object.keys(currentTrack.current).length !== 0) {
         currentTrack.current.stop();
         currentTrack.current = {};
+        MusicControl.resetNowPlaying();
         stopAnimation();
       }
         setSongTitleFromQueue(item);
@@ -350,6 +366,11 @@ const PlayerScreen = ({ navigation }) => {
             stopAnimation();
           }
         });
+        // Set lockscreen after play call
+        MusicControl.setNowPlaying({
+          title: item.title,
+          duration: currentTrack.current.getDuration()
+        });
       }
     });
   }
@@ -360,6 +381,7 @@ const PlayerScreen = ({ navigation }) => {
           isShuffleOn.current = false;
         }
           if (currentTrackIndex.current >= tracksArr.length - 1) {
+            MusicControl.resetNowPlaying();
             resetCurrentTrack();
             return;
           } else {
@@ -371,6 +393,7 @@ const PlayerScreen = ({ navigation }) => {
               currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
                 if (error) {
                   console.log(error);
+                  MusicControl.resetNowPlaying();
                   stopAnimation();
                   return;
                 } else {
@@ -390,13 +413,20 @@ const PlayerScreen = ({ navigation }) => {
                         isPlay.current = false;
                     }
                     }else{
+                      MusicControl.resetNowPlaying();
                       console.log('Issue playing file');
                       stopAnimation();
                     }
                 });
+                // Set lockscreen after play call
+                MusicControl.setNowPlaying({
+                  title: tracksArr[currentTrackIndex.current].title,
+                  duration: currentTrack.current.getDuration()
+                });
                 }
               });
             } else {
+              MusicControl.resetNowPlaying();
               resetCurrentTrack();
               isPlay.current = false;
           }
@@ -410,6 +440,7 @@ const PlayerScreen = ({ navigation }) => {
           isShuffleOn.current = false;
         }
           if (currentTrackIndex.current <= -1) {
+            MusicControl.resetNowPlaying();
             stopAnimation();
             return;
           } else {
@@ -421,6 +452,7 @@ const PlayerScreen = ({ navigation }) => {
               currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
                 if (error) {
                   console.log(error);
+                  MusicControl.resetNowPlaying();
                   stopAnimation();
                   return;
                 } else {
@@ -442,12 +474,19 @@ const PlayerScreen = ({ navigation }) => {
                     }else{
                       isPlay.current = false;
                       console.log('Issue playing file');
+                      MusicControl.resetNowPlaying();
                       stopAnimation();
                     }
+                });
+                // Set lockscreen after play call
+                MusicControl.setNowPlaying({
+                  title: tracksArr[currentTrackIndex.current].title,
+                  duration: currentTrack.current.getDuration()
                 });
                 }
               });
             } else {
+              MusicControl.resetNowPlaying();
               resetCurrentTrack();
               isPlay.current = false;
           }
