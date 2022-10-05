@@ -18,6 +18,8 @@
 		7699B88040F8A987B510C191 /* libPods-anytune-anytuneTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-anytune-anytuneTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9404A19028CBE19800DC0119 /* dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9404A18F28CBE19800DC0119 /* dummy.swift */; };
+		9465B90928EDF31A00042346 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 94F9D88528E875EA00888E7A /* MaterialCommunityIcons.ttf */; };
+		9465B90A28EDF32400042346 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9407DFEF28D00FAA00C85D6F /* Ionicons.ttf */; };
 		9625E97C24B445B3BF1FB01E /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4DC1AD06096748939FA5FFC5 /* OFL.txt */; };
 		EF04D254CA284F6AB3D96523 /* LobsterTwo-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C35EC3C6F1C84728B564C753 /* LobsterTwo-Italic.ttf */; };
 		F3E7F63F846E40A5A1064ECC /* LobsterTwo-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E1CBCB2ACE6849D89AEDDD2E /* LobsterTwo-Regular.ttf */; };
@@ -285,6 +287,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9465B90A28EDF32400042346 /* Ionicons.ttf in Resources */,
+				9465B90928EDF31A00042346 /* MaterialCommunityIcons.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				07C897CCACA34516B4607DE0 /* Lobster-Regular.ttf in Resources */,

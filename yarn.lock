@@ -5943,6 +5943,11 @@
   "resolved" "https://registry.npmjs.org/react-native-gradle-plugin/-/react-native-gradle-plugin-0.0.7.tgz"
   "version" "0.0.7"
 
+"react-native-music-control@^1.4.1":
+  "integrity" "sha512-IBiP2Yhb9iUPutXFFfNWKnf+CG/up9oPlMqY6qq1MDlhJ6giMCGQ+qO/Qd5hoDE0ZfxyqShs3CZaSch+oV/2zg=="
+  "resolved" "https://registry.npmjs.org/react-native-music-control/-/react-native-music-control-1.4.1.tgz"
+  "version" "1.4.1"
+
 "react-native-popup-menu@^0.16.1":
   "integrity" "sha512-xRS7mRh0exwu7Iw8PPVHdM11d13A/KzYjy0/fZx3zVtxISxPkNaDGayau6oa7HqO3Nj0oS9ulFCYjcQfG6vahA=="
   "resolved" "https://registry.npmjs.org/react-native-popup-menu/-/react-native-popup-menu-0.16.1.tgz"
@@ -5974,7 +5979,7 @@
     "prop-types" "^15.7.2"
     "yargs" "^16.1.1"
 
-"react-native@*", "react-native@>=0.8.0", "react-native@0.69.0":
+"react-native@*", "react-native@>=0.40.0", "react-native@>=0.8.0", "react-native@0.69.0":
   "integrity" "sha512-TBaoNMaxxVLRNNxNXmi8sauxSv6LXF5O6apoUPHVYC1Tr9dP0DqiQP2ngHHJM9ysxxIkX47OTho028HRbkgTCA=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.69.0.tgz"
   "version" "0.69.0"

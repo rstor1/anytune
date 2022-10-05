@@ -4,7 +4,8 @@ import { getAllTracks } from './../utils/getTracks';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MatCommIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import MusicControl from 'react-native-music-control';
+import { Command } from 'react-native-music-control';
 import Sound from 'react-native-sound';
 import {
   MenuContext,
@@ -33,7 +34,22 @@ const PlayerScreen = ({ navigation }) => {
     let shuffleIndex = useRef([]);
     let [shuffleIndexList, updateShuffleIndexList] = useState(shuffleIndex.current);
 
-  
+    // Basic Lockscreen Controls
+    MusicControl.enableControl('play', true);
+    MusicControl.enableControl('pause', true);
+    MusicControl.enableControl('stop', true);
+    MusicControl.enableControl('nextTrack', true);
+    MusicControl.enableControl('previousTrack', true);
+
+    // on iOS this event will also be triggered by audio router change events
+    // happening when headphones are unplugged or a bluetooth audio peripheral disconnects from the device
+    MusicControl.on(Command.pause, ()=> {
+      trackPlayer();
+    });
+    MusicControl.on(Command.play, ()=> {
+      trackPlayer();
+    });
+
     useEffect(() => {
       (async () => {
         const unsubscribe = navigation.addListener('blur', () => {
@@ -49,6 +65,9 @@ const PlayerScreen = ({ navigation }) => {
 
     useEffect(() => {
       Sound.setCategory('Playback');
+      Sound.setCategory('mixWithOthers', false);
+      MusicControl.enableBackgroundMode(true);
+
       (async () => {
         getAllTracks().then((results) => {
           if (results.length !== 0) {
@@ -220,6 +239,7 @@ const PlayerScreen = ({ navigation }) => {
       if (playPauseIcon == 'ios-play-outline') {
         isPlay.current = true;
       } else {
+        //MusicControl.resetNowPlaying();
         isPlay.current = false;
       } 
       if (isPlay.current) {
@@ -233,8 +253,13 @@ const PlayerScreen = ({ navigation }) => {
               trackPlayer();
             }else{
               stopAnimation();
+              MusicControl.resetNowPlaying();
               console.log('Issue playing file');
             }
+          });
+          // Set lockscreen after play call
+          MusicControl.setNowPlaying({
+            title: tracksArr[currentTrackIndex.current].title,
           });
         } else {
           currentTrackIndex.current++;
@@ -262,15 +287,21 @@ const PlayerScreen = ({ navigation }) => {
                       isPlay.current = false;
                     }
                   }else{
+                    MusicControl.resetNowPlaying();
                     stopAnimation();
                     console.log('Issue playing file');
                     isPlay.current = false;
                   }
                 });  
+                // Set lockscreen after play call
+                MusicControl.setNowPlaying({
+                  title: tracksArr[currentTrackIndex.current].title,
+                });
             }  
           });
         }
       } else {
+        MusicControl.resetNowPlaying();
         currentTrack.current.pause();
         stopAnimation();
         setplayPauseIcon('ios-play-outline');
