@@ -377,8 +377,9 @@ const PlayerScreen = ({ navigation }) => {
 
       const skipForward = async () => {
         if (isShuffleOn.current) {
-          setIsShuffleOnState(false);
-          isShuffleOn.current = false;
+          setIsShuffleOnState(true);
+          doTheShuffle();
+          return;
         }
           if (currentTrackIndex.current >= tracksArr.length - 1) {
             MusicControl.resetNowPlaying();
@@ -436,8 +437,9 @@ const PlayerScreen = ({ navigation }) => {
 
       const skipBack = async () => {
         if (isShuffleOn.current) {
-          setIsShuffleOnState(false);
-          isShuffleOn.current = false;
+          setIsShuffleOnState(true);
+          doTheShuffle();
+          return;
         }
           if (currentTrackIndex.current <= -1) {
             MusicControl.resetNowPlaying();
