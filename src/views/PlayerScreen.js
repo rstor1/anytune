@@ -293,7 +293,7 @@ const PlayerScreen = ({ navigation }) => {
                     isPlay.current = false;
                     stopAnimation();
                     // Play next track if exists in tracksArr
-                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                    let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id+1);
                     if (hasNext) {
                       trackPlayer();
                     } else {
@@ -352,7 +352,7 @@ const PlayerScreen = ({ navigation }) => {
                 currentTrack.current = {};
                 isPlay.current = false;
                 stopAnimation();
-                let hasNext = tracksArr.find(x => x.id == item.id+1);
+                let hasNext = tracksArr.find(x => x.id == item?.id+1);
                 if (hasNext) {
                   //Play next item
                   singleTrackPlayBack(tracksArr[item.id]);
@@ -378,6 +378,7 @@ const PlayerScreen = ({ navigation }) => {
       const skipForward = async () => {
         if (isShuffleOn.current) {
           setIsShuffleOnState(true);
+          currentTrack.current.stop();
           doTheShuffle();
           return;
         }
@@ -387,9 +388,11 @@ const PlayerScreen = ({ navigation }) => {
             return;
           } else {
             currentTrackIndex.current++;
-            let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id);
+            let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id);
             if (hasNext) {
-              currentTrack.current.stop();
+              if (hasNext.id !== 1) {
+                currentTrack.current.stop();
+              }
               setSongTitleFromQueue(tracksArr[currentTrackIndex.current]);
               currentTrack.current = new Sound(tracksArr[currentTrackIndex.current].url,null,(error)=> {
                 if (error) {
@@ -405,7 +408,7 @@ const PlayerScreen = ({ navigation }) => {
                     if(success){  
                       currentTrack.current = {};
                       stopAnimation();
-                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id+1);
                       if (hasNext) {
                         //Play next item
                         singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
@@ -438,6 +441,7 @@ const PlayerScreen = ({ navigation }) => {
       const skipBack = async () => {
         if (isShuffleOn.current) {
           setIsShuffleOnState(true);
+          currentTrack.current.stop();
           doTheShuffle();
           return;
         }
@@ -465,7 +469,7 @@ const PlayerScreen = ({ navigation }) => {
                     if(success){  
                       currentTrack.current = {};
                       stopAnimation();
-                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current].id+1);
+                      let hasNext = tracksArr.find(x => x.id == tracksArr[currentTrackIndex.current]?.id+1);
                       if (hasNext) {
                         //Play next item
                         singleTrackPlayBack(tracksArr[tracksArr[currentTrackIndex.current].id]);
