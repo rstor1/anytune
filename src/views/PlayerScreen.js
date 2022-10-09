@@ -252,7 +252,6 @@ const PlayerScreen = ({ navigation }) => {
       if (playPauseIcon == 'ios-play-outline') {
         isPlay.current = true;
       } else {
-        //MusicControl.resetNowPlaying();
         isPlay.current = false;
       } 
       if (isPlay.current) {
@@ -261,6 +260,11 @@ const PlayerScreen = ({ navigation }) => {
           startAnimation();
           currentTrack.current.play((success) => {
             if (success) {
+              if (isShuffleOn.current) {
+                isPlay.current = false;
+                doTheShuffle();
+                return;
+              }
               currentTrack.current = {};
               setplayPauseIcon('ios-play-outline');
               trackPlayer();
@@ -289,6 +293,11 @@ const PlayerScreen = ({ navigation }) => {
                 setSelectedId(tracksArr[currentTrackIndex.current].id);
                 currentTrack.current.play((success)=>{
                   if(success){  
+                    if (isShuffleOn.current) {
+                      isPlay.current = false;
+                      doTheShuffle();
+                      return;
+                    }
                     currentTrack.current = {};
                     isPlay.current = false;
                     stopAnimation();
