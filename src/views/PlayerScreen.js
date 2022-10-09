@@ -262,6 +262,8 @@ const PlayerScreen = ({ navigation }) => {
             if (success) {
               if (isShuffleOn.current) {
                 isPlay.current = false;
+                currentTrack.current.stop();
+                currentTrack.current = {};
                 doTheShuffle();
                 return;
               }
@@ -291,10 +293,13 @@ const PlayerScreen = ({ navigation }) => {
             } else {
                 setplayPauseIcon('ios-pause-outline');
                 setSelectedId(tracksArr[currentTrackIndex.current].id);
+                flatList.current.scrollToIndex({index: tracksArr[currentTrackIndex.current]?.id});
                 currentTrack.current.play((success)=>{
                   if(success){  
                     if (isShuffleOn.current) {
                       isPlay.current = false;
+                      currentTrack.current.stop();
+                      currentTrack.current = {};
                       doTheShuffle();
                       return;
                     }
