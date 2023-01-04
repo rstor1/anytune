@@ -5,7 +5,14 @@ This is a music player that downloads any song from youtube using the api from r
 
 ## Specs
 
-React Native version 0.69
+React Native version 0.69.
+Optimized for iOS and not tested on Android
+
+## How to use
+
+Once you have an account setup at rapid api for the youtube to mp3 api (link above in Description section), add your key to: **src/config/apiConfig.js**. The rest is just making sure you have all the code cloned locally and using xcode to get it on your iphone. That part is not covered here but can easily be found in the React Native docs: https://reactnative.dev/ and/or swimming in Google searches:p
+
+Note: Once you have everything setup and running, you may notice that the track did not download when you click download to download the youtube track from the url. You just have to try again. I am not sure why this happens yet, but my guess it is the youtube api from rapid api. I had this same behavior when I created a web version. 
 
 
 Home Screen:
