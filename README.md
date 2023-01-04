@@ -1,4 +1,13 @@
 # anytune
+## Description
+
+This is a music player that downloads any song from youtube using the api from rapid api: https://rapidapi.com/ytjar/api/youtube-mp36/. It is a complete music track player that saves mp3's to your local iphone's storage. It is free to use and alter to anyone. I will not be maintaining this repo. 
+
+## Specs
+
+React Native version 0.69
+
+
 Home Screen:
 
 ![IMG-2690](https://user-images.githubusercontent.com/43070937/210638508-f8a955f3-615c-47e1-a7c5-4506e1567b83.PNG)
