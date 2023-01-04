@@ -8,6 +8,10 @@ This is a music player I made quick and perhaps dirty that downloads any song fr
 React Native version 0.69.
 Optimized for iOS and not tested on Android.
 
+## Features
+
+Converts and downloads any song on YouTube, Play, Stop, Skip Forward and Back, Shuffle Play, Animated song title, Delete song from queue and storage, Continuous background playback, Car play.
+
 ## How to use
 
 Once you have an account setup at rapid api for the youtube to mp3 api (link above in Description section), add your key to: **src/config/apiConfig.js**. The rest is just making sure you have all the code cloned locally and using xcode to get it on your iphone. That part is not covered here but can easily be found in the React Native docs: https://reactnative.dev/ and/or swimming in Google searches:p
