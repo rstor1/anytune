@@ -6,7 +6,7 @@ This is a music player I made quick and perhaps dirty that downloads any song fr
 ## Specs
 
 React Native version 0.69.
-Optimized for iOS and not tested on Android.
+Optimized for iOS. Tested on iOS version 16.1.2. Not tested on Android.
 
 ## Features
 
