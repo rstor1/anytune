@@ -29,6 +29,10 @@ Delete track option:
 
 ![IMG-2692](https://user-images.githubusercontent.com/43070937/210638536-531fb1d7-b2b9-4c02-b034-94003df7e4fc.PNG)
 
+Continuous background playback (car included):
+
+![IMG-2693](https://user-images.githubusercontent.com/43070937/210655265-7a45636f-159b-4321-b9a4-ace6bc95447f.PNG)
+
 App example workflow:
 
 https://user-images.githubusercontent.com/43070937/210573703-d4cde54e-b74b-4287-928e-ac6d712077bc.mp4
