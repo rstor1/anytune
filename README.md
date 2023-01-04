@@ -6,7 +6,7 @@ This is a music player that downloads any song from youtube using the api from r
 ## Specs
 
 React Native version 0.69.
-Optimized for iOS and not tested on Android
+Optimized for iOS and not tested on Android.
 
 ## How to use
 
