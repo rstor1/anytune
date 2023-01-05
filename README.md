@@ -10,7 +10,7 @@ Optimized for iOS. Tested on iOS version 16.1.2. Not tested on Android.
 
 ## Features
 
-Converts and downloads any audio on YouTube, Play, Stop, Skip Forward and Back, Shuffle Play, Animated song title, Delete song from queue and storage, Continuous background playback, Car play.
+Converts and downloads any audio on YouTube. Includes the functions: Play, Stop, Skip Forward and Back, Shuffle Play, Animated song title, Delete song from queue and storage, Continuous background playback, Car play.
 
 ## How to use
 
